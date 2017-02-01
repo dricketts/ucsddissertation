@@ -231,51 +231,52 @@ remainder of the introduction provides an overview of the proof rules. In
 general, the rules seek to leverage timing characteristics of systems and
 improve modularity of reasoning.
 
-In \textbf{Chapter~\ref{??}} we present two rules: one for verifying a
-single sampled-data component under assumption on the environment and
-another for composing such a component with another that satisfies this
-assumption. The first rule decomposes verification into a property of the
-discrete controller and the continuous dynamics, automatically handling the
-fact that the time between executions of the controller is bounded. This
-tailored decomposition eliminates some of the basic tedious manipulation
-common to every sampled-data system, allowing one to focus on the
-application specific aspects of verification. The second proof rule allows
-for component composition with non-cylical assumptions -- that is, a
-component $C1$ can guarantee an invariant $Q$ while assuming and invariant
-$P$ guaranteed by $C2$. However, $C2$ cannot rely on the invariance of $P$
-when guaranteeing $Q$. In spite of this restriction, we show that such a
-rule has important applications for verifying controllers in the presence
-of sensor error and delay.
+In \textbf{Chapter~\ref{chap:memo15}} we present two rules: one for
+verifying a single sampled-data component under assumption on the
+environment and another for composing such a component with another that
+satisfies this assumption. The first rule decomposes verification into a
+property of the discrete controller and the continuous dynamics,
+automatically handling the fact that the time between executions of the
+controller is bounded. This tailored decomposition eliminates some of the
+basic tedious manipulation common to every sampled-data system, allowing
+one to focus on the application specific aspects of verification. The
+second proof rule allows for component composition with non-cylical
+assumptions -- that is, a component $C1$ can guarantee an invariant $Q$
+while assuming and invariant $P$ guaranteed by $C2$. However, $C2$ cannot
+rely on the invariance of $P$ when guaranteeing $Q$. In spite of this
+restriction, we show that such a rule has important applications for
+verifying controllers in the presence of sensor error and delay.
 
-Next, \textbf{Chapter~\ref{??}} presents a general framework for building
-sampled-data systems \emph{modularly}. This framework differs from the
-above composition approach by requiring that each component provide a
+Next, \textbf{Chapter~\ref{chap:emsoft16}} presents a general framework for
+building sampled-data systems \emph{modularly}. This framework differs from
+the above composition approach by requiring that each component provide a
 stronger interface. In particular, rather than proving invariance of a
 property, each component provides preservation of an inductive invariant,
 and a notion of progress of the system under that inductive invariant. This
 stronger interface comes at a minor cost while proving two important
 benefits. First, it allows for cyclic dependencies between sampled-data
-components, thus removing the restriction from Chapter~\ref{???}. Second,
-it allows us to explore a richer set of operators for modularly building
-and verifying sampled-data components, namely substitution, conjunction,
-and disjunction. It is this second benefit that we explore thoroughly by
-applying our framework to build verified 3-dimensional geofences for a
-UAV. We show that our theory can handle the important situation in which
-different components output to the same set of actuators, as exemplified by
-the geofence application.
+components, thus removing the restriction from
+Chapter~\ref{chap:memo15}. Second, it allows us to explore a richer set of
+operators for modularly building and verifying sampled-data components,
+namely substitution, conjunction, and disjunction. It is this second
+benefit that we explore thoroughly by applying our framework to build
+verified 3-dimensional geofences for a UAV. We show that our theory can
+handle the important situation in which different components output to the
+same set of actuators, as exemplified by the geofence application.
 
-Finally, in \textbf{Chapter~\ref{??}}, we revisit verification of a single
-sampled-data system component. Contrary to our prior approaches, we began
-by building a geofence that was good enough to be adopted by the popular
-open source UAV autopilot called Ardupilot~\cite{???}. After building such
-a module (now available in the latest Ardupilot release), we attempted to
-formally verify a component of it in Coq, particularly the logic that
-prevents the vehicle from violating a boundary in a single spatial
-dimension. Similar logic is present in the atomic components from
-Chapters~\ref{??}  and~\ref{??}, but realistic performance requirements for
-Ardupilot resulted in considerably more complicated control logic. This
-additional complexity demanded better proof rules, and we built rules that
-improve upon the state of the art in formal verification in two ways.
+Finally, in \textbf{Chapter~\ref{chap:exp-smpl}}, we revisit verification
+of a single sampled-data system component. Contrary to our prior
+approaches, we began by building a geofence that was good enough to be
+adopted by the popular open source UAV autopilot called
+Ardupilot~\cite{???}. After building such a module (now available in the
+latest Ardupilot release), we attempted to formally verify a component of
+it in Coq, particularly the logic that prevents the vehicle from violating
+a boundary in a single spatial dimension. Similar logic is present in the
+atomic components from Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16},
+but realistic performance requirements for Ardupilot resulted in
+considerably more complicated control logic. This additional complexity
+demanded better proof rules, and we built rules that improve upon the state
+of the art in formal verification in two ways.
 
 First, deductive techniques typically involve some continuous analogue of
 induction, e.g. differential induction~\cite{Ghorbal14diffinv} or barrier
@@ -334,6 +335,15 @@ cyber-physical systems, and we hope that the proof rules and associated
 applications in this document provide evidence for this claim.
 
 \end{dissertationintroduction}
+
+\chapter{}
+\label{chap:memo15}
+
+\chapter{}
+\label{chap:emsoft16}
+
+\chapter{}
+\label{chap:exp-smpl}
 
 \chapter{An ordinary page}
 The purpose of this page is to illustrate an ordinary page of text in
