@@ -212,16 +212,14 @@ general-purpose, complete proof calculi for hybrid
 systems~\cite{platzer???,HHL???}. While powerful, the generality of the
 proof rules prevents them from leveraging particular common characteristics
 of cyber-physical systems, such as their modular construction from smaller
-components.
-
-This dissertation presents and applies a series of proof rules that do
-leverage such characteristics in the domain of \emph{sampled-data
+components. This dissertation presents and applies a series of proof rules
+that do leverage such characteristics in the domain of \emph{sampled-data
   systems}~\cite{chen1995sampled}. In this important class of systems,
 there is a discrete controller that runs periodically.  In between
 executions of the controller, the system evolves according to continuous
 physical dynamics.
 
-First, we present two rules: one for verifying a single sampled-data
+In \textbf{Chapter~\ref{??}} we present two rules: one for verifying a single sampled-data
 component under assumption on the environment and another for composing
 such a component with another that satisfies this assumption. The first
 rule decomposes verification into a property of the discrete controller and
@@ -237,21 +235,59 @@ guaranteeing $Q$. In spite of this restriction, we show that such a rule
 has important applications for verifying controllers in the presence of
 sensor error and delay.
 
-Next, we present a general framework for building sampled-data systems
-\emph{modularly}. This framework differs from the above composition
-approach by requiring that each component provide a stronger interface. In
-particular, rather than proving invariance of a property, each component
-provides preservation of an inductive invariant, and a notion of progress
-of the system under that inductive invariant. This more expressive
-interface comes at a minor cost and provides two benefits. First, it allows
-for cyclic dependencies between sampled-data components, thus removing the
-restriction from Chapter~\ref{???}. Second, it allows us to explore a
-richer set of operators for modularly building and verifying sampled-data
-components, namely substitution, conjunction, and disjunction. It is this
-second benefit that we explore thoroughly by applying our framework to
-build verified 3-dimensional geofences for a UAV. We show that our theory
-can handle the important situation in which different components output to
-the same set of actuators, as exemplified by the geofence application.
+Next, \textbf{Chapter~\ref{??}} presents a general framework for building
+sampled-data systems \emph{modularly}. This framework differs from the
+above composition approach by requiring that each component provide a
+stronger interface. In particular, rather than proving invariance of a
+property, each component provides preservation of an inductive invariant,
+and a notion of progress of the system under that inductive invariant. This
+stronger interface comes at a minor cost while proving two important
+benefits. First, it allows for cyclic dependencies between sampled-data
+components, thus removing the restriction from Chapter~\ref{???}. Second,
+it allows us to explore a richer set of operators for modularly building
+and verifying sampled-data components, namely substitution, conjunction,
+and disjunction. It is this second benefit that we explore thoroughly by
+applying our framework to build verified 3-dimensional geofences for a
+UAV. We show that our theory can handle the important situation in which
+different components output to the same set of actuators, as exemplified by
+the geofence application.
+
+Finally, in \textbf{Chapter~\ref{??}}, we revisit verification of a single
+sampled-data system component. Contrary to our prior approaches, we began
+by building a geofence that was good enough to be adopted by the popular
+open source UAV autopilot called Ardupilot~\cite{???}. After building such
+a module (now available in the latest Ardupilot release), we attempted to
+formally verify a component of it in Coq, particularly the logic that
+prevents the vehicle from violating a boundary in a single spatial
+dimension. Similar logic is present in the atomic components from
+Chapters~\ref{??}  and~\ref{??}, but realistic performance requirements for
+Ardupilot resulted in considerably more complicated control logic. This
+additional complexity demanded better proof rules, and we built rules that
+improve upon the state of the art in formal verification in two ways.
+
+First, deductive techniques typically involve some continuous analogue of
+induction, e.g. differential induction~\cite{Ghorbal14diffinv} or barrier
+certificates~\cite{prajna04barrier}. Recent work from the control theory
+community~\cite{kong2013barrier,xu15barrier,nguyen16barrier} has produced a
+new version of barrier certificates that are less conservative for closed
+properties. We provide the first implementation of this approach in a
+formal verification context, and demonstrate its ease of use on a component
+of the ardupilot geofencing module.
+
+Second, control systems are often designed under the assumption that
+controllers run continuously, while the actual implementation is typically
+a sampled-data system. System designers can compensate for this (and other)
+approximations by adding a safety ``buffer'' to the system. For example,
+the ardupilot geofence module stops the vehicle 1 meter prior to the actual
+safety boundary. We developed a proof rule that formalizes this design
+approach by decomposing verification into a condition on the continuous
+time approximation and another on the approximation error.  This rule
+allows one to perform the majority of reasoning in a purely continuous
+model using powerful techniques resulting from over a century of control
+theory research.
+
+Motivated by our attempt to add a geofence to a popular open
+source autopilot called Ardupilot~\cite{???}, we
 
 As a realistic running example, we apply all of the rules to.... We justify
 the realistic nature of our application by flying the controllers we verify
