@@ -1,0 +1,131 @@
+In this chapter, we describe the logical framework used in
+Chapters~\ref{chap:memo15}
+and~\ref{chap:emsoft16}. Chapter~\ref{chap:exp-smpl} uses a different
+framework, so the logical background is presented within that chapter. All
+of our work is formalized inside the Coq proof assistant, but for
+exposition purposes, we focus on the mathematical concepts rather than
+concrete Coq syntax.
+
+\section{Linear Temporal Logic}
+In Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16}, we encode
+sampled-data systems and their properties within discrete-time linear
+temporal logic (LTL).  An LTL formula specifies the possible traces of a
+system.  In our model, a trace is an infinite sequence of states
+representing observations of a system at discrete points in time.  A state
+is a mapping from variables to real numbers.  Inspired by Lamport's
+Temporal Logic of Actions (TLA)~\cite{lamport1994temporal}, formulas in our
+logic are classified into \emph{state formulas} (predicates over a single
+state), \emph{action formulas} (state relations specifying system
+transitions), and \emph{trace formulas} (predicates over traces).  In
+action formulas, the values of variables in the current state are notated
+using bold script, e.g. \tlavar{x}, while the values of variables in the
+next state use bold script with a prime, e.g. \tlanextvar{x}.  Variables
+not mentioned in a formula are unconstrained.
+
+For example, the following formula describes a system where the initial
+value of \tlavar{x} is 0 and the value of \tlavar{x} is incremented during
+each transition.
+\[
+\tlavar{x} = 0~\wedge~\Always\left(\tlanextvar{x} = \tlavar{x} + 1\right)
+\]
+The initial condition ($\tlavar{x} = 0$) is a state formula.  The
+transition relation ($\tlanextvar{x} = \tlavar{x} + 1$) is an action
+formula and refers to values in the next state using a prime,
+e.g. \tlanextvar{x}.  Both the transition relation and the property are
+lifted to trace formulas using the always modality ($\Box$).  When always
+is applied to an action formula, it means that all pairs of temporally
+adjacent states are related by the action formula.  When always is applied
+to a state formula, it means that all states satisfy the property.
+
+Finally, the semantics of formulas is defined in terms of two relations:
+``models'' (written $tr \models P$) states when a predicate ($P$) holds on
+a trace ($tr$), and ``entails'' (written $P \entails Q$, or just $\entails
+Q$ when $P$ is trivial) states when one predicate implies another on
+\emph{all} traces, i.e.
+\[\begin{array}{rcl}
+P \entails Q & \defined & \forall tr, tr \models P \rightarrow tr \models Q
+\end{array}
+\]
+For example, the following states that all traces of the above system have
+the property that $\tlavar{x}$ is always at least 0.
+\[
+\entails \tlavar{x} = 0 \wedge \Always\left(\tlanextvar{x} = \tlavar{x} + 1\right) \rightarrow \Always\left(\tlavar{x} \geq 0\right)
+\]
+The implication means that the traces of the system are a subset of the
+traces for which $\tlavar{x}$ is at least 0 in all states.
+
+\section{Sampled-data systems in LTL}
+In a periodic sampled-data system, the state repeatedly transitions either
+continuously according to some differential (in)equations or discretely
+according to the (possibly nondeterministic) controller.  In addition, the
+elapsed time between discrete transitions of the controller is bounded by
+some constant.  In LTL, we can model such systems using a formula of the
+form
+\[
+I\wedge\always{(\Sys{D}{\W}{\Delta})}
+\]
+Here, we use the action formula $\Sys{D}{\W}{\Delta}$, specifying
+transitions of a sampled-data system, where: $D$ is an action formula
+specifying the discrete controller, and $\W$ is a predicate over state
+variables and their derivatives. This can be used to express systems of
+differential equations $\dt{\tlavar{x}} = e_1 \wedge \dt{\tlavar{y}} =
+e_2$, differential inequalities $\dt{\tlavar{z}} \leq e$, and even pure
+state predicates restricting the evolution of variables with respect to
+each other $x \leq y$. These expressions can be conjoined to express all
+three concepts in the same continuous evolution. Formally,
+\[\begin{array}{l}
+\Sys{D}{\W}{\Delta} \triangleq \\
+\qquad
+\begin{array}{cl}
+& D \wedge \tlavar{\tau} = 0 \wedge 0 < \tlanextvar{\tau} \leq \Delta \\
+\vee & \ContinuousP{\left(\W \wedge \dt{\tlavar{\tau}} = -1\right)} \wedge \tlanextvar{\tau} \geq 0 \\
+\end{array}
+\end{array}
+\]
+In this action formula, the disjunction captures the fact that the system
+transitions either continuously according to the physical world or
+discretely according to the controller.  The definition encapsulates both
+the semantics of the continuous transition and the timing characteristics
+of the system.
+%%The two non-trivial aspects of this formula are the specification of
+%%continuous transitions and the enforcement of the timing constraint.
+
+Informally, $\Continuous{(\W)}$ means that the state evolves for
+\emph{some} amount of time according to a continuous function whose value
+and derivative at each point in time satisfy the predicate in \W.
+Formally, $\Continuous{(\W)}$ is an LTL action formula, defined as follows:
+\[\begin{array}{l}
+\Continuous{\W} \equiv \\
+\quad \exists (r : \R)\, (f : \R \rightarrow \textsf{Var} \rightarrow \R), 0 < r \\
+\qquad \wedge\, \forall 0 \leq t \leq r, \W(f(t),\dt{f}(t)) \\
+\qquad \wedge\, x_1 = f(0,x_1) \wedge \ldots \wedge x_n = f(0,x_n) \\
+\qquad \wedge\, x_1\tlaprime = f(r,x_1) \wedge \ldots \wedge x_n\tlaprime = f(r,x_n)
+\end{array}
+\]
+Here, $x_1,\ldots,x_n$ are variables in the system, $r$ is the amount of
+time that the system evolves for, and $f$ is a differentiable function from
+time to state that gives the evolution of the system state during the
+continuous transition. The first conjunct expresses that the predicate \W
+holds on the state and its derivative during the entire system evolution.
+The second and third conjuncts relate the current state to the value of the
+solution $f$ at 0 and the next state to the value of $f$ at time $r$.
+
+At first glance, this definition of continuous transitions may look strange
+since it seems to allow the trace to ``skip'' states.  However, while a
+single trace may skip a certain state during a continuous transition,
+another trace does include that state because the definition of
+$\Continuous{}$ captures \emph{all} possible continuous transitions of any
+duration.  Thus, a formula of the form
+$I\wedge\always{(\Sys{D}{\W}{\Delta})}$ captures all possible sequences of
+discrete observations of a system.  The soundness of this encoding is
+argued by Lamport in~\cite{lamport2005real}.
+
+The timing constraint is captured using the variable \tlavar{\tau} (not
+mentioned in $D$ or $\W$), which tracks the time that elapses between
+successive transitions of the discrete controller.  During the continuous
+evolution of the system, \tlavar{\tau} decreases at the same rate as time,
+i.e. $\dt{\tlavar{\tau}} = -1$, and $\tlanextvar{\tau} \geq 0$ ensures that
+no more than $\Delta$ time elapses between successive discrete transitions
+of the controller.  The discrete transition occurs when the timer has
+expired ($\tlavar{\tau} = 0$); this transition resets the timer to a
+positive value that is at most $\Delta$.

@@ -1,0 +1,134 @@
+%% \newcommand{\greg}[1]{\textcolor{blue}{GREG: #1}}
+\newcommand{\dan}[1]{\textcolor{green}{DAN: #1}}
+\newcommand{\sorin}[1]{\textcolor{red}{SORIN: #1}}
+%% \newcommand{\mario}[1]{\textcolor{teal}{MARIO: #1}}
+\newcommand{\greg}[1]{\textcolor{blue}{GREG: #1}}
+%% \newcommand{\dan}[1]{}
+%% \newcommand{\sorin}[1]{}
+\newcommand{\mario}[1]{}
+\newcommand{\change}[1]{#1}
+%% \newcommand{\change}[1]{\cbstart#1\cbend\xspace}
+%% \newcommand{\revquote}[1]{\begin{quote}#1\end{quote}}
+\newcommand{\revquote}[1]{\reviewer #1}
+
+%\renewcommand{\dan}[1]{}
+%\renewcommand{\sorin}[1]{}
+%\renewcommand{\greg}[1]{}
+
+\newcommand{\monitor}[2]{\ensuremath{\textbf{\{} #2\, \mathbf{unless}\,#1\textbf{\}}}}
+%% \newcommand{\todo}[1]{\textcolor{red}{\textbf{#1}}}
+\newcommand{\dt}[1]{\ensuremath{\dot{#1}}}
+
+
+\newcommand{\W}{\ensuremath{\mathcal{W}}\xspace}
+\newcommand{\D}{\ensuremath{\mathcal{D}}\xspace}
+\newcommand{\Worldof}[1]{\W_{#1}}
+\newcommand{\Discrof}[1]{\D_{#1}}
+\newcommand{\SysA}[0]{{\textsf{Sys}}}
+\newcommand{\System}[0]{{\textsf{System}}\xspace}
+\newcommand{\Sys}[3]{\SysA{}_{#3}\;#1\;#2}
+\newcommand{\SysP}[3]{\Sys{#1}{#2}{#3}}
+\newcommand{\SystemP}[3]{\ensuremath{\mathsf{System}_{#3}\;#1\;#2}}
+\newcommand{\SysUA}{\ensuremath{\SysA{}^{\textsf{untimed}}}}
+\newcommand{\always}{\ensuremath{\Box}}
+\newcommand{\Always}[1]{\always{} #1}
+\newcommand{\Continuous}{\ensuremath{\mathsf{Continuous}}\xspace}
+\newcommand{\ContinuousP}[1]{\ensuremath{\Continuous\,#1}}
+
+\newcommand{\ardupilot}{ArduPilot}
+\newcommand{\rTLA}{RTLA}
+
+\newcommand{\Invertible}[0]{\textsf{Invertible}}
+\newcommand{\Enabled}{\textsf{Enabled}\xspace}
+\newcommand{\EnabledP}[1]{\ensuremath{\textsf{Enabled}\, #1}}
+\newcommand{\Enabledness}{\textsf{Enabled}ness\xspace}
+\newcommand{\Rename}[2]{\ensuremath{\{#1\}#2}}
+
+\newcommand{\Quadcopter}[0]{\ensuremath{\mathsf{Quadcopter}}\xspace}
+\newcommand{\QuadcopterP}[2]{\ensuremath{\Quadcopter\,#1\,#2}}
+
+\newcommand{\XZUnconstrained}{Q_{xz}}
+\newcommand{\worldXZUnconstrained}{\Worldof{\XZUnconstrained}}
+\newcommand{\XZ}{Q_{xz\pitch}}
+\newcommand{\worldXZ}{\Worldof{\XZ}}
+
+\newcommand{\ProofRule}[1]{\textsc{#1}}
+
+\newcommand{\defined}{\triangleq}
+
+\newcommand{\entails}{\vdash}
+
+\newcommand{\relates}{\sim}
+
+\newcommand{\SysConjoin}{\ensuremath{\otimes}\xspace}
+\newcommand{\SysConjoinP}[2]{#1 \SysConjoin #2}
+\newcommand{\disjoinop}{\ensuremath{\oplus}\xspace}
+\newcommand{\SysDisjoin}[4]{#1\protect\;{}^{#2}\hspace{-0.3em}\disjoinop^{#4} #3}
+%% \newcommand{\VelShim}{{\small \textsf{VelShim}}}
+%% \newcommand{\DelayComp}{{\small \textsf{DelayComp}}}
+%% \newcommand{\HeightShim}{{\small \textsf{AltitudeMonitor}}\xspace}
+\newcommand{\HeightShimP}[1]{\HeightShim\,#1}
+\newcommand{\derivShimv}{{\ensuremath{\mathsf{M}_\partial}}}
+\newcommand{\derivShimx}{{\ensuremath{\mathsf{M}_{\partial^2}}}}
+\newcommand{\intervalShimx}{{\ensuremath{\intervalShim_{\partial^2}}}}
+\newcommand{\intervalShim}{{\ensuremath{\mathsf{Int}}}}
+\newcommand{\invShimv}{{\ensuremath{I_{\partial}}}}
+\newcommand{\invShimx}{{\ensuremath{I_{\partial^2}}}}
+\newcommand{\invInterval}{\ensuremath{I_{\intervalShim}}}
+\newcommand{\invXZUnconstrained}{{\ensuremath{I_{\XZUnconstrained}}}}
+\newcommand{\mirrorx}{\sigma_{-}}
+\newcommand{\tlaprime}{{}^\prime}
+\newcommand{\tlavar}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\tlanextvar}[1]{\ensuremath{\boldsymbol{#1}^\prime}}
+\newcommand{\Next}[1]{#1\tlaprime}
+
+\newcommand{\append}[2]{#1 \cup #2}
+\newcommand{\Solves}[3]{\ensuremath{\mathsf{Solves}(#1,#2,#3)}}
+\newcommand{\R}{\ensuremath{\mathbb{R}}}
+\newcommand{\Rnneg}{\R_{\geq 0}}
+\newcommand{\Rpos}{\R_{> 0}}
+\newcommand{\ltac}{\ensuremath{\mathcal{L}_{\textrm{tac}}}}
+\newcommand{\Time}{\ensuremath{\tau}}
+\newcommand{\T}{a}
+%% \newcommand{\Tproposed}{T_{?}}
+\newcommand{\Y}{y}
+\newcommand{\Ymax}{\Y}
+\newcommand{\Vmax}{v}
+\newcommand{\Vmin}{V}
+\newcommand{\Vmaxpre}{v_{max\_pre}}
+\newcommand{\Vmaxpost}{V_{max\_post}}
+\newcommand{\Vminpost}{V_{min\_post}}
+\newcommand{\V}{v}
+\newcommand{\Vsense}{v_{sense}}
+\newcommand{\X}{x}
+\newcommand{\Xsense}{x_{sense}}
+\newcommand{\Xmax}{x_{\it max}}
+\newcommand{\ub}{\ensuremath{\mathsf{\V_{ub}}}}
+\newcommand{\Vderiv}{\V_{deriv}}
+\newcommand{\free}{\textit{free}}
+\newcommand{\nonzero}{\textit{nonzero}}
+\newcommand{\True}{\mathsf{True}}
+\newcommand{\Id}{I_d}
+\newcommand{\Tmin}{\ensuremath{\T_{\mathsf{min}}}\xspace}
+\newcommand{\amin}{\Tmin}
+\newcommand{\tdist}[3]{\mathsf{td}(#1,#2,#3)}
+\newcommand{\sdist}[1]{\mathsf{sd}(#1)}
+\newcommand{\ubY}{\ensuremath{\mathsf{\Y_{ub}}}}
+
+\newcommand{\progress}{progress}
+\newcommand{\SysPreserves}{\ensuremath{\mathsf{SysPreserves}}\xspace}
+\newcommand{\SysPreservesP}[2]{\ensuremath{\mathsf{SysPreserves}\,#1\,#2}}
+%\newcommand{\NeverStuck}{\textsf{Receptive}\xspace}
+%\newcommand{\NeverStuckP}[2]{\ensuremath{\mathsf{Receptive}\;#1\;#2}}
+\newcommand{\SysNeverStuck}{\textsf{Sys\xmakefirstuc{\progress{}}}\xspace}
+\newcommand{\SysNeverStuckP}[2]{\ensuremath{\mathsf{Sys\xmakefirstuc{\progress{}}}\;#1\;#2}}
+\newcommand{\roll}[0]{\ensuremath{\phi}}
+\newcommand{\pitch}[0]{\ensuremath{\theta}}
+
+\newcommand{\smallangle}{\ensuremath{\mathcal{C}_{\pitch\roll}}}
+\newcommand{\Ca}{\ensuremath{\mathcal{C}_{a}}}
+\newcommand{\mypara}[1]{\medskip\noindent\textbf{#1.} }
+\newcommand{\polarBound}{\mathcal{C}_{\pi}}
+\newcommand{\rectConstraint}{\mathcal{C}_{xz}}
+\newcommand{\xConstraint}{\mathcal{C}_{x}}
+\newcommand{\zConstraint}{\mathcal{C}_{z}}
