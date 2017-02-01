@@ -205,7 +205,7 @@ However, one of the typically-stated drawbacks of verification in proof
 assistants is the extremely high manual labor cost required to produce
 these proofs.
 
-Scaling deductive verification to realistic hybrid systems requires
+Scaling deductive verification to realistic cyber-physical systems requires
 powerful higher-order proof rules that capture common reasoning
 patterns. Prior work in deductive verification has produced
 general-purpose, complete proof calculi for hybrid
@@ -219,21 +219,21 @@ there is a discrete controller that runs periodically.  In between
 executions of the controller, the system evolves according to continuous
 physical dynamics.
 
-In \textbf{Chapter~\ref{??}} we present two rules: one for verifying a single sampled-data
-component under assumption on the environment and another for composing
-such a component with another that satisfies this assumption. The first
-rule decomposes verification into a property of the discrete controller and
-the continuous dynamics, automatically handling the fact that the time
-between executions of the controller is bounded. This tailored
-decomposition eliminates some of the basic tedious manipulation common to
-every sampled-data system, allowing one to focus on the application
-specific aspects of verification. The second proof rule allows for
-component composition with non-cylical assumptions -- that is, a component
-$C1$ can guarantee an invariant $Q$ while assuming and invariant $P$
-guaranteed by $C2$. However, $C2$ cannot rely on the invariance of $P$ when
-guaranteeing $Q$. In spite of this restriction, we show that such a rule
-has important applications for verifying controllers in the presence of
-sensor error and delay.
+In \textbf{Chapter~\ref{??}} we present two rules: one for verifying a
+single sampled-data component under assumption on the environment and
+another for composing such a component with another that satisfies this
+assumption. The first rule decomposes verification into a property of the
+discrete controller and the continuous dynamics, automatically handling the
+fact that the time between executions of the controller is bounded. This
+tailored decomposition eliminates some of the basic tedious manipulation
+common to every sampled-data system, allowing one to focus on the
+application specific aspects of verification. The second proof rule allows
+for component composition with non-cylical assumptions -- that is, a
+component $C1$ can guarantee an invariant $Q$ while assuming and invariant
+$P$ guaranteed by $C2$. However, $C2$ cannot rely on the invariance of $P$
+when guaranteeing $Q$. In spite of this restriction, we show that such a
+rule has important applications for verifying controllers in the presence
+of sensor error and delay.
 
 Next, \textbf{Chapter~\ref{??}} presents a general framework for building
 sampled-data systems \emph{modularly}. This framework differs from the
@@ -286,15 +286,31 @@ allows one to perform the majority of reasoning in a purely continuous
 model using powerful techniques resulting from over a century of control
 theory research.
 
-Motivated by our attempt to add a geofence to a popular open
-source autopilot called Ardupilot~\cite{???}, we
+As already mentioned, our running application in this work is a geofencing
+controller for UAVs, an important application due to their potential safety
+thread combined with widespread use by hobbyists and businesses alike. We
+would like to ensure that the controller we build and verify are not toy
+models. We have attempted to justify the realistic nature of our work by
+flying the controllers we verify on an actual quadcopter. Throughout this
+dissertation, we discuss lessons learned from this experience.
 
-As a realistic running example, we apply all of the rules to.... We justify
-the realistic nature of our application by flying the controllers we verify
-on an actual quadcopter.
-
-Crucial to the successful implementation of this work is the use of an
-expressive proof assistant such as Coq.
+Unless otherwise noted, all results in this dissertation have been formally
+proven sound within the foundational Coq proof assistant. Previous
+work~\cite{yang2011understanding-compiler-bugs} has demonstrated that
+foundationally verified systems are empirically highly reliable. While
+important, this dissertation would like to emphasize a less discussed
+benefit of higher-order proof assistants like Coq. The
+\emph{expressiveness} of Coq allows one to extend any given formal
+verification framework (e.g. general proof calculi for hybrid systems) with
+powerful domain specific proof rules (e.g. our sampled-data system rules),
+without compromising soundness. Such an extension improves verification
+productivity by ensuring that a user can apply the right proof rule for his
+or her application while still being able to depend on the above mentioned
+reliability guarantees. It is thus the view of the dissertation author that
+the expressive framework of a higher-order proof assistant is crucial to
+scaling formal verification to realistic cyber-physical systems, and we
+hope that the proof rules and associated applications in this document
+provide evidence for this claim.
 
 \end{dissertationintroduction}
 
