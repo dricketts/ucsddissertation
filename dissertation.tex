@@ -193,31 +193,43 @@ text of the abstract must be double spaced.
 
 % Optional Introduction
 \begin{dissertationintroduction}
-Errors in cyber-physical systems can lead to disastrous consequences,
+Errors in cyber-physical systems (CPS) can lead to disastrous consequences,
 including loss of life.  These consequences mean that such systems demand
 the most rigorous verification techniques.  There has been a variety of
 work on developing fully-automated tools for verification of cyber-physical
 systems~\cite{PHAVerSTTT08,HyTechCAV97}, but due to the complexity of the
 domain, these tools are only able to verify particular classes of systems
 and properties.  On the other hand, all cyber-physical systems are in range
-for deductive verification in a proof assistant, at least in theory.
-However, one of the typically-stated drawbacks of verification in proof
-assistants is the extremely high manual labor cost required to produce
-these proofs.
+for deductive verification in a proof assistant, at least in theory.  In
+this technique, a user writes a formal model of a system in the language of
+the proof assistant and then interactively proves it correct. However, one
+of the typically-stated drawbacks of verification in proof assistants is
+the extremely high manual labor cost required to produce these proofs.
 
-Scaling deductive verification to realistic cyber-physical systems requires
-powerful higher-order proof rules that capture common reasoning
-patterns. Prior work in deductive verification has produced
-general-purpose, complete proof calculi for hybrid
-systems~\cite{platzer???,HHL???}. While powerful, the generality of the
-proof rules prevents them from leveraging particular common characteristics
-of cyber-physical systems, such as their modular construction from smaller
-components. This dissertation presents and applies a series of proof rules
-that do leverage such characteristics in the domain of \emph{sampled-data
-  systems}~\cite{chen1995sampled}. In this important class of systems,
-there is a discrete controller that runs periodically.  In between
-executions of the controller, the system evolves according to continuous
-physical dynamics.
+Mitigating this manual proof burden requires powerful higher-order proof
+rules that capture common proof strategies. Prior work in deductive
+verification has approached this task by designing general-purpose,
+complete proof calculi for hybrid systems~\cite{platzer???,HHL???}. Hybrid
+systems are CPS models comprised of both a discrete component (e.g. control
+software) and a continuous component (the physical world). While powerful,
+the generality of the proof calculi prevents them from leveraging
+particular common characteristics of cyber-physical systems. For example,
+no proof rule in~\cite{platzer??} assumes that the time between executions
+of a controller is bounded because this is not true of all hybrid
+systems. However, this is true of many realistic hybrid systems, and proofs
+about such systems will tend to follow a similar proof structure. Thus, it
+is beneficial to complement general hybrid system proof rules with domain
+specific proof rules that capture common reasoning patterns.
+
+This dissertation presents and applies a series of proof rules that capture
+common reasoning patterns in the important domain of \emph{periodic
+  sampled-data systems}~\cite{chen1995sampled}. In such a system, there is
+a digital controller that runs periodically. In between executions of the
+controller, the system evolves according to continuous physical
+dynamics. Many modern cyber-physical systems fit into this domain. The
+remainder of the introduction provides an overview of the proof rules. In
+general, the rules seek to leverage timing characteristics of systems and
+improve modularity of reasoning.
 
 In \textbf{Chapter~\ref{??}} we present two rules: one for verifying a
 single sampled-data component under assumption on the environment and
