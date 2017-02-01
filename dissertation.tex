@@ -294,23 +294,32 @@ models. We have attempted to justify the realistic nature of our work by
 flying the controllers we verify on an actual quadcopter. Throughout this
 dissertation, we discuss lessons learned from this experience.
 
-Unless otherwise noted, all results in this dissertation have been formally
-proven sound within the foundational Coq proof assistant. Previous
-work~\cite{yang2011understanding-compiler-bugs} has demonstrated that
-foundationally verified systems are empirically highly reliable. While
-important, this dissertation would like to emphasize a less discussed
-benefit of higher-order proof assistants like Coq. The
-\emph{expressiveness} of Coq allows one to extend any given formal
-verification framework (e.g. general proof calculi for hybrid systems) with
-powerful domain specific proof rules (e.g. our sampled-data system rules),
-without compromising soundness. Such an extension improves verification
-productivity by ensuring that a user can apply the right proof rule for his
-or her application while still being able to depend on the above mentioned
-reliability guarantees. It is thus the view of the dissertation author that
-the expressive framework of a higher-order proof assistant is crucial to
-scaling formal verification to realistic cyber-physical systems, and we
-hope that the proof rules and associated applications in this document
-provide evidence for this claim.
+Rigorous verification requires that results be mechanically checked in some
+way. Rather than implementing a standalone tool for this task, we performed
+all verification within the foundational Coq proof assistant. Previous
+work~\cite{yang2011understanding-compiler-bugs} has empirically
+demonstrated that foundationally verified systems are highly
+reliable. While important, we would like to emphasize a less discussed
+benefit of higher-order proof assistants like Coq. A standalone domain
+specific verification tool would require adding each proof rule as an
+axiom. Moreover, a new proof rule might have side conditions not
+expressible in the tool's logic, requiring custom reasoning to handle these
+side conditions. In this context, the axiom and associated custom reasoning
+have the potential to compromise soundness.
+
+On the other hand, the \emph{expressiveness} of Coq allows one add new
+proof rules as theorems that are formally proven within Coq's logic. This
+means that one can extend any given set of general proof rules in Coq
+(e.g. general proof calculi for hybrid systems) with powerful domain
+specific proof rules (e.g. our sampled-data system rules), without
+compromising soundness. Such an extension improves verification
+productivity by ensuring that a user can apply the right domain-specific
+proof rule for his or her application while still being able to depend on
+the above mentioned reliability guarantees. It is thus the view of the
+dissertation author that the expressive framework of a higher-order proof
+assistant is crucial to scaling formal verification to realistic
+cyber-physical systems, and we hope that the proof rules and associated
+applications in this document provide evidence for this claim.
 
 \end{dissertationintroduction}
 
