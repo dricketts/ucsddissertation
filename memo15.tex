@@ -1,0 +1,37 @@
+This chapter presents two proof rules for reasoning about sampled-data
+systems. The first rule is an induction rule specialized to sampled-data
+systems. This rule decomposes an inductive safety proof into a proof about
+the initial state, a proof about the discrete transition, and a proof about
+the continuous transition. For each of the transitions, the proof rule
+introduces timing constraints that are guaranteed by the periodic
+sampled-data model. Such a rule automatically manages the aspects of an
+inductive safety proof that are common to all periodic sampled-data
+systems, allowing the user to focus on the application specific aspects of
+the proof. Without such a proof rule, this tedious decomposition would have
+to be done manually.
+
+The second rule provides a simple mechanism for composing systems with
+non-cyclic dependencies. This allows one component to assume that invariant
+of another when proving its own invariant. We demonstrate how this can be
+used to reason about systems in the presence of both sensor error and delay
+by chaining instances of this rule together. Chapter~\ref{chap:emsoft16}
+presents an alternate approach that removes the non-cyclic restriction.
+
+We introduce the proof rules along side a running example: a controller
+that prevents a quadcopter from violating some maximum velocity.  We
+additionally used the rules to verify a controller that prevents a
+quadcopter from violating some maximum height, and used our composition
+rule to verify them both in the presence of sensor error and delay.
+
+In an effort to ensure that our examples are realistic, we implemented them
+on a actual quadcopter and performed flight tests. Doing so forced us to
+confront an important issue. Since our controllers are components of a much
+larger system containing numerous controllers, how do we architect the
+autopilot to incorporate our controllers? Throughout the paper, we describe
+our solution and discuss engineering tradeoffs. This solution has not been
+formally verified. That is, we have not formally modeled the entire
+autopilot and verified the properties of our controllers in that
+context. We view this as an important direction for future work. We also
+discuss discrepancies between our model and reality as well as lessons
+learned from doing foundational verification of sampled-data systems.
+
