@@ -42,10 +42,13 @@ Finally, the semantics of formulas is defined in terms of two relations:
 a trace ($tr$), and ``entails'' (written $P \entails Q$, or just $\entails
 Q$ when $P$ is trivial) states when one predicate implies another on
 \emph{all} traces, i.e.
+\begin{definition}[LTL Entailment]
 \[\begin{array}{rcl}
 P \entails Q & \defined & \forall tr, tr \models P \rightarrow tr \models Q
 \end{array}
 \]
+\label{def:ltl-entails}
+\end{definition}
 For example, the following states that all traces of the above system have
 the property that $\tlavar{x}$ is always at least 0.
 \[
@@ -73,15 +76,18 @@ e_2$, differential inequalities $\dt{\tlavar{z}} \leq e$, and even pure
 state predicates restricting the evolution of variables with respect to
 each other $x \leq y$. These expressions can be conjoined to express all
 three concepts in the same continuous evolution. Formally,
+\begin{definition}[\SysA{} abstraction]
 \[\begin{array}{l}
 \Sys{D}{\W}{\Delta} \triangleq \\
 \qquad
 \begin{array}{cl}
-& D \wedge \tlavar{\tau} = 0 \wedge 0 < \tlanextvar{\tau} \leq \Delta \\
-\vee & \ContinuousP{\left(\W \wedge \dt{\tlavar{\tau}} = -1\right)} \wedge \tlanextvar{\tau} \geq 0 \\
+& D \wedge \Time{} = 0 \wedge 0 < \tlanextvar{\Time{}} \leq \Delta \\
+\vee & \ContinuousP{\left(\W \wedge \dt{\Time{}} = -1\right)} \wedge \tlanextvar{\Time{}} \geq 0 \\
 \end{array}
 \end{array}
 \]
+\label{def:sys-abstraction}
+\end{definition}
 In this action formula, the disjunction captures the fact that the system
 transitions either continuously according to the physical world or
 discretely according to the controller.  The definition encapsulates both
@@ -94,6 +100,7 @@ Informally, $\Continuous{(\W)}$ means that the state evolves for
 \emph{some} amount of time according to a continuous function whose value
 and derivative at each point in time satisfy the predicate in \W.
 Formally, $\Continuous{(\W)}$ is an LTL action formula, defined as follows:
+\begin{definition}[Continuous evolution]
 \[\begin{array}{l}
 \Continuous{\W} \equiv \\
 \quad \exists (r : \R)\, (f : \R \rightarrow \textsf{Var} \rightarrow \R), 0 < r \\
@@ -102,6 +109,8 @@ Formally, $\Continuous{(\W)}$ is an LTL action formula, defined as follows:
 \qquad \wedge\, x_1\tlaprime = f(r,x_1) \wedge \ldots \wedge x_n\tlaprime = f(r,x_n)
 \end{array}
 \]
+\label{def:continuous}
+\end{definition}
 Here, $x_1,\ldots,x_n$ are variables in the system, $r$ is the amount of
 time that the system evolves for, and $f$ is a differentiable function from
 time to state that gives the evolution of the system state during the
@@ -120,12 +129,12 @@ $I\wedge\always{(\Sys{D}{\W}{\Delta})}$ captures all possible sequences of
 discrete observations of a system.  The soundness of this encoding is
 argued by Lamport in~\cite{lamport2005real}.
 
-The timing constraint is captured using the variable \tlavar{\tau} (not
-mentioned in $D$ or $\W$), which tracks the time that elapses between
-successive transitions of the discrete controller.  During the continuous
-evolution of the system, \tlavar{\tau} decreases at the same rate as time,
-i.e. $\dt{\tlavar{\tau}} = -1$, and $\tlanextvar{\tau} \geq 0$ ensures that
-no more than $\Delta$ time elapses between successive discrete transitions
-of the controller.  The discrete transition occurs when the timer has
-expired ($\tlavar{\tau} = 0$); this transition resets the timer to a
-positive value that is at most $\Delta$.
+The timing constraint is captured using the variable \Time{} (not mentioned
+in $D$ or $\W$), which tracks the time that elapses between successive
+transitions of the discrete controller.  During the continuous evolution of
+the system, \Time{} decreases at the same rate as time, i.e. $\dt{\Time{}} =
+-1$, and $\tlanextvar{\Time{}} \geq 0$ ensures that no more than $\Delta$
+time elapses between successive discrete transitions of the controller.
+The discrete transition occurs when the timer has expired ($\Time{} = 0$);
+this transition resets the timer to a positive value that is at most
+$\Delta$.

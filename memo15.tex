@@ -18,20 +18,340 @@ by chaining instances of this rule together. Chapter~\ref{chap:emsoft16}
 presents an alternate approach that removes the non-cyclic restriction.
 
 We introduce the proof rules along side a running example: a controller
-that prevents a quadcopter from violating some maximum velocity.  We
-additionally used the rules to verify a controller that prevents a
-quadcopter from violating some maximum height, and used our composition
-rule to verify them both in the presence of sensor error and delay.
+that prevents a simple model of a quadcopter from violating some maximum
+velocity. We additionally used the rules to verify a controller that
+prevents a quadcopter from violating some maximum height, and used our
+composition rule to verify them both in the presence of sensor error and
+delay.
 
 In an effort to ensure that our examples are realistic, we implemented them
 on a actual quadcopter and performed flight tests. Doing so forced us to
 confront an important issue. Since our controllers are components of a much
 larger system containing numerous controllers, how do we architect the
-autopilot to incorporate our controllers? Throughout the paper, we describe
-our solution and discuss engineering tradeoffs. This solution has not been
-formally verified. That is, we have not formally modeled the entire
-autopilot and verified the properties of our controllers in that
-context. We view this as an important direction for future work. We also
-discuss discrepancies between our model and reality as well as lessons
-learned from doing foundational verification of sampled-data systems.
+autopilot to incorporate our controllers, while still maintaining our
+safety guarantees? Throughout the paper, we describe our solution and
+discuss engineering tradeoffs. We also discuss discrepancies between our
+model and reality as well as lessons learned from doing foundational
+verification of sampled-data systems.
 
+\section{Overview}
+We start by giving an overview of how our running controller examples fit
+into the architecture of a quadcopter's autopilot. We would like our two
+controllers to ensure that a quadcopter does not exceed some maximum
+velocity and some maximum height. These are practical restrictions from a
+safety standpoint. For example, in order to ensure that small UAVs do not
+interfere with larger aircraft, the FAA mandates that they do not fly more
+than 400 feet above ground level.
+
+Our goal here will be to (1) add some simple logic to the control software
+to prevent violation of these safety properties and (2) formally verify
+that this logic guarantees that the safety properties hold, with respect to
+some model of the physical dynamics of the UAV.  However, we would like to
+accomplish this while allowing the UAV to run its existing complex
+controllers that may not guarantee these properties -- these sorts of
+controllers have the potential to achieve high performance, but their
+complexity presents a challenge to formal verification.
+
+We accomplish this by implementing our controllers as safety checks that
+run after all of the (potentially complex) controllers have run, but before
+any signals are sent to the motors.  Our controllers perform a safety check
+on the outputs from the higher level controllers.  In our height limit
+example, the controller checks whether the output of the higher level
+controllers would put the UAV in a state in which it could not stop before
+exceeding the upper bound.  If the check passes then the controller issues
+exactly the same outputs as the higher level controllers.  Otherwise, the
+controller issues a conservative action to ensure the desired safety
+property.
+
+Our architecture, inspired by the simplex
+architecture~\cite{sha1996evolving}, is depicted in
+Figure~\ref{fig:arch-shim}, which shows a simplified view of a UAV
+architecture with and without our controllers.  This architecture allows us
+to focus our verification effort on our safety critical controllers,
+without needing to reason about complex existing controllers.  This design
+makes the verification tractable, while retaining the benefits of
+state-of-the art controllers. We discuss this architecture in more detail
+in Section~\ref{sec:arch}.
+
+\begin{figure}[t]
+\centering
+
+
+\begin{subfigure}[t]{.49\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum width=1cm]
+
+    \node[wnode,text width=2cm,align=center] (existing)  {Existing Control Software} ;
+
+    \node[draw=black,above=of existing,minimum height=0.5cm,xshift=0.7cm] (user) {User} ;
+    \node[draw=black,above=of existing,minimum height=0.6cm,xshift=-1cm] (sensor) {Sensors} ;
+
+    \node[wnode,below=of existing] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([xshift=0.12cm + \i * 0.3 cm]#1.south) -- ([xshift=0.12cm + \i * 0.3 cm]#2.north) ;}}
+
+    \quadline{existing}{motor}
+    \draw[-latex] let \p1 = (user.south),
+                      \p2 = (existing.north) in
+                  (user.south) -- (\x1,\y2) ;
+    \draw[-latex] let \p1 = (sensor.south),
+                      \p2 = (existing.north) in
+                  ([xshift=0.2cm]sensor.south) -- (\x1+0.2cm,\y2) ;
+
+
+
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:memo15-arch-without}
+\end{subfigure}
+~
+\begin{subfigure}[t]{.49\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum width=1cm]
+
+    \node[fill=black,text=white,text width=2cm,align=center,minimum height=1cm] (mon) at (0,0) {Verified Control} ;
+    \node[wnode,above=of mon,text width=2cm,align=center] (existing)  {Existing Control Software} ;
+
+    \node[draw=black,above=of existing,minimum height=0.5cm,xshift=0.7cm] (user) {User} ;
+    \node[draw=black,above=of existing,minimum height=0.6cm,xshift=-1cm] (sensor) {Sensors} ;
+
+    \node[wnode,below=of mon] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([xshift=0.12cm + \i * 0.3 cm]#1.south) -- ([xshift=0.12cm + \i * 0.3 cm]#2.north) ;}}
+
+    \quadline{mon}{motor}
+    \quadline{existing}{mon}
+    \draw[-latex] let \p1 = (user.south),
+                      \p2 = (existing.north) in
+                  (user.south) -- (\x1,\y2) ;
+    \draw[-latex] let \p1 = (sensor.south),
+                      \p2 = (existing.north) in
+                  ([xshift=0.2cm]sensor.south) -- (\x1+0.2cm,\y2) ;
+    \draw[-latex] ([xshift=-0.5cm]sensor.south) |- (mon.west) ;
+
+
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:memo15-arch-with}
+\end{subfigure}
+
+\caption{A simplified depiction of UAV architecture~\ref{fig:memo15-arch-without} without and~\ref{fig:memo15-arch-with} with one of our controllers.}
+\label{fig:arch-shim}
+\end{figure}
+
+\section{Model and Verification}
+\label{sec:memo15-model}
+We now focus on our controller that ensures the velocity of a simple
+one-dimensional model of a quadcopter never exceeds a constant upper bound
+\ub{}. We start by modeling the system using our abstraction \SysA{}
+(Definition~\ref{def:sys-abstraction}), present our sampled-data induction
+rule, and demonstrate how to use this rule to verify the safety invariant
+of the velocity bounding controller. In
+Section~\ref{sec:memo15-composition}, we will present our composition rule
+and show how to use it to verify safety in the presence of sensor error and
+delay.
+
+\subsection{Model}
+Our velocity controller makes use of the following variables (by
+convention, lower case variables are continuous and upper case variables
+are discrete): $\V$ is the actual velocity of the system, whose behavior
+will be specified by differential equations encoding the physics of the
+real world; $\Vmax$ is an upper bound on $\V$ (e.g. produced by a sensor)
+and is an input to our controller; $\Tproposed$ is the thrust requested by the
+higher level controller, which is also an input to our controller; $\T$ is the
+thrust produced by our controller, which gets sent to the motors. Our controller is
+defined as follows:
+\[
+\VelShim \defined \Sys{D}{\W}{\Delta}
+\]
+where
+\[
+\begin{array}{rcl}
+\W & \defined & \dt{\V}\leq\T - g \\
+D & \defined & ((\Tproposed-g)\cdot\Delta + \Vmax \leq \ub \wedge \T\tlaprime {=} \Tproposed) \vee \T\tlaprime {=} g
+\end{array}
+\]
+$\W$ states the differential inequality capturing how velocity is related
+to thrust ($\T$) and gravity ($g$).  This relationship is an inequality
+rather than an equality because we are modeling a quadcopter, whose
+vertical thrust is only upper-bounded by the thrust produced by the motors.
+We discuss this further in Section~\ref{sec:experiences}.  The action
+formula $D$ captures the control logic of our controller.  The disjunction
+encodes, essentially, the following conditional statement:
+$\texttt{if}\,\Tproposed \cdot \Delta + \Vmax \leq
+\ub\,\texttt{then}\,\T\tlaprime = \Tproposed\,\texttt{else}\,\T\tlaprime =
+g$; though it also allows executing the safe action ($\T\tlaprime = g$)
+when the check succeeds.
+
+Since \SysA{} unfolds directly to an LTL formula, we can express the
+correctness of our controller directly in LTL as follows, where $\entails$
+(Definition~\ref{def:ltl-entails}) represents entailment in LTL, expressing
+that the formula to the right of the $\entails$ holds on all traces
+satisfying the formula to the left of the $\entails$:
+\begin{align}
+\label{thm:shim-safe}
+\Always{\V \leq \Vmax} \vdash \Init \wedge \VelShim \rightarrow \Always{\V \leq \ub} \\
+\Init \defined \max(0,\T - g )\cdot\Delta + \V \leq \ub \nonumber
+\end{align}
+This formula states that if $\Vmax$ is always an upper bound on the actual
+velocity ($\Always{\V \leq \Vmax}$), then the velocity controller ensures
+that the velocity of the system is always less than or equal to \ub{}.
+This requires a predicate on the initial state, given by \Init, which
+states that the velocity is at most \ub{} and furthermore is small enough
+that it will still be at most \ub{} when the controller first runs (which
+will be at most $\Delta$ time units away).  For now, we do not specify how
+the value of $\Vmax$ is produced; that is, $\Vmax$ does not appear in any
+action formulas (transitions).  Instead, we simply assume that such a value
+is provided to the controller.  In Section~\ref{sec:compose}, we will show
+how to specify systems that produce a $\Vmax$ satisfying this assumption
+and we will show how to compose them with the velocity controller.
+
+\subsection{Proof}
+We now show how we prove the above LTL formula in Coq.  To do so, we need
+an inductive invariant that is preserved both by the continuous transitions
+(those of the world) and the discrete program.  Although we have
+implemented several mechanisms for simplifying reasoning about \SysA{}, we
+currently do not infer invariants automatically. In the case of the
+velocity controller, the inductive invariant is relatively simple: the
+velocity cannot violate the upper bound before the next execution of the
+controller:
+\[
+\max(0,\T - g)*\Time + \V \leq \ub
+\]
+Here, the variable \Time{}, introduced in
+Definition~\ref{def:sys-abstraction} tracks the maximum amount of time
+until the next execution of the controller.
+
+In order to prove that this formula is an inductive invariant, we use the
+the \textsc{SysInd} proof rule (Theorem~\ref{thm:sys-ind}), which is a
+special case of discrete induction tailored to systems that are described
+by our \SysA{} construct.  Proof rules such as this one allow us to
+abstract the implementation of \SysA{} and make for overall cleaner proofs.
+Informally, \textsc{SysInd} states that a formula $P$ is an (inductive)
+invariant of a system if $P$ holds on all possible initial states of the
+system, and $P$ is preserved by the two possible transitions that the
+system can make.  We use $P\tlaprime$ to denote the formula $P$ with all
+unprimed variables $\tlavar{x}$ replaced with their primed counterpart
+$\tlanextvar{x}$.
+
+\begin{theorem}[\textsc{SysInd}]
+For state formulas $P,Q,I$, action formula $D$, constant $\Delta \in \R$,
+and evolution predicate $\W$, if the following conditions hold:
+
+\begin{enumerate}[label=\roman*), ref=\roman*]
+\item
+\label{thm:sys-ind-init}
+$Q~\entails 0 \leq \Time \leq \Delta~\wedge~I \rightarrow P$
+\item
+\label{thm:sys-ind-discr}
+$Q~\entails 0 \leq \Time{} \leq \Delta~\wedge~P~\wedge~D~\wedge~\tlanextvar{\Time{}} = \Time{} \rightarrow \Next{P}$
+\item
+\label{thm:sys-ind-cont}
+$Q~\entails \Time \leq \Delta~\wedge~0 \leq \tlanextvar{\Time}~\wedge~P~\wedge~\Continuous{(\W)} \rightarrow \Next{P}$
+\end{enumerate}
+then
+\[
+\Always{Q}~\entails I~\wedge~\Sys{D}{\W}{\Delta} \rightarrow \Always{P}
+\]
+\label{thm:sys-ind}
+\end{theorem}
+
+To illustrate how the proof works, we walk through the proof obligations
+obtained by applying \textsc{SysInd} to our velocity controller.  First, we
+must prove that $P$ holds on all initial states of the system:
+\[
+\begin{array}{lc}
+\V \leq \Vmax & \vdash \left[
+\begin{array}{ll}
+& 0 \leq \Time \leq \Delta \\
+\wedge & \max(0,\T - g )\cdot\Delta + \V \leq \ub \\
+\rightarrow & \max(0,\T - g)\cdot\Time + \V \leq \ub
+\end{array}
+\right]
+\end{array}
+\]
+Proving this requires first order reasoning over real arithmetic in Coq.
+We can solve simple obligations such as this one, using existing Coq real
+arithmetic decision procedures~\cite{besson2007micromega} that produce
+foundational Coq proofs completely automatically.  While these procedures
+are not complete, they are still able to discharge many obligations that
+arise in practice.  When they are unable to completely prove a goal, we are
+forced to manually construct a machine-checked proof of the remaining
+obligations. This requires manual application of real arithmetic lemmas
+such as transitivity of comparison operators. This can become quite tedious
+as the system becomes more complex.  The compositional reasoning
+techniques, which we describe in Section~\ref{sec:memo15-composition}, help
+to reduce this burden by producing smaller arithmetic goals that only deal
+with a part of the system. We discuss this benefit in more detail in
+Section~\ref{sec:height-shim}.
+
+Next, we prove that the inductive invariant is preserved by discrete steps
+of the system.  There are actually two cases to prove: when the proposed
+thrust passes the controller's safety check and when the controller issues
+a thrust equal to gravity.  In the first case, we are left to prove the
+following proof obligation (the reasoning in the second case is simpler):
+\[
+\begin{array}{lc}
+\V \leq \Vmax & \vdash \left[
+\begin{array}{ll}
+& 0 \leq \Time \leq \Delta \\
+\wedge & \max(0,\T - g)*\Time + \V \leq \ub \\
+\wedge & (\Tproposed-g)*\Delta + \Vmax \leq \ub \\
+\wedge & \T\tlaprime = \Tproposed  \\
+\wedge & \V\tlaprime = \V \\
+\wedge & \Time\tlaprime = \Time \\
+\rightarrow & \max(0,\T\tlaprime - g)*\Time\tlaprime + \V\tlaprime \leq \ub
+\end{array}
+\right]
+\end{array}
+\]
+Proving this obligation requires first order reasoning over real
+arithmetic, but fits into the automation described above.
+
+Finally, we prove that the inductive invariant is preserved by continuous
+transitions.  This proof obligation is slightly more difficult:
+\[
+\begin{array}{lc}
+\V \leq \Vmax & \vdash \left[
+\begin{array}{ll}
+& \Time \leq \Delta \wedge 0 \leq \Time\tlaprime \\
+\wedge & \max(0,\T - g)\cdot\Time + \V \leq \ub \\
+\wedge & \Continuous{(\W)} \\
+\rightarrow & \max(0,\T\tlaprime - g)\cdot\Time\tlaprime + \V\tlaprime \leq \ub
+\end{array}
+\right]
+\end{array}
+\]
+Continuous evolution of the physical world is expressed by the formula
+$\Continuous{(\W)}$ (Definition~\ref{def:continuous}). We prove this
+obligation using our adaptation of Platzer's differential induction proof
+rule~\cite{platzer2010logical}, which justifies a technique for proving
+invariants of a system of differential equations without computing an
+explicit solution.  Roughly speaking, differential induction captures the
+fact that $e_1 \leq e_2$ is preserved by a continuous transition
+(e.g. $\Continuous{(\W)}$) if the derivative of $e_1$ is less than or equal
+to the derivative of $e_2$, under the constraints given by $\W$.  Applying
+differential induction leaves us to prove a first order formula over real
+arithmetic that the automation can solve with a minimal amount of
+assistance.
+
+Proving these four goals completes the proof
+of~\eqref{thm:shim-safe}. Since the inductive invariant was simple and the
+arithmetic reasoning was within the scope of Coq's built-in automation,
+this proof was relatively easy. However, the proof demonstratess the
+general mechanics of proving an invariant of a periodic sampled-data system
+and illustrates how \textsc{SysInd} abstracts some of the tedious reasoning
+common to all such systems.
+
+\section{Composition}
+\label{sec:memo15-composition}

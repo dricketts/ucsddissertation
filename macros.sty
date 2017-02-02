@@ -64,9 +64,9 @@
 \newcommand{\SysConjoinP}[2]{#1 \SysConjoin #2}
 \newcommand{\disjoinop}{\ensuremath{\oplus}\xspace}
 \newcommand{\SysDisjoin}[4]{#1\protect\;{}^{#2}\hspace{-0.3em}\disjoinop^{#4} #3}
-%% \newcommand{\VelShim}{{\small \textsf{VelShim}}}
-%% \newcommand{\DelayComp}{{\small \textsf{DelayComp}}}
-%% \newcommand{\HeightShim}{{\small \textsf{AltitudeMonitor}}\xspace}
+\newcommand{\VelShim}{{\small \textsf{VelCtrl}}}
+\newcommand{\DelayComp}{{\small \textsf{DelayComp}}}
+\newcommand{\HeightShim}{{\small \textsf{AltCtrl}}\xspace}
 \newcommand{\HeightShimP}[1]{\HeightShim\,#1}
 \newcommand{\derivShimv}{{\ensuremath{\mathsf{M}_\partial}}}
 \newcommand{\derivShimx}{{\ensuremath{\mathsf{M}_{\partial^2}}}}
@@ -78,9 +78,10 @@
 \newcommand{\invXZUnconstrained}{{\ensuremath{I_{\XZUnconstrained}}}}
 \newcommand{\mirrorx}{\sigma_{-}}
 \newcommand{\tlaprime}{{}^\prime}
-\newcommand{\tlavar}[1]{\ensuremath{\boldsymbol{#1}}}
-\newcommand{\tlanextvar}[1]{\ensuremath{\boldsymbol{#1}^\prime}}
+\newcommand{\tlavar}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\tlanextvar}[1]{\ensuremath{\mathbf{#1}^\prime}}
 \newcommand{\Next}[1]{#1\tlaprime}
+\newcommand{\Init}{\ensuremath{\textsf{Init}}}
 
 \newcommand{\append}[2]{#1 \cup #2}
 \newcommand{\Solves}[3]{\ensuremath{\mathsf{Solves}(#1,#2,#3)}}
@@ -88,23 +89,23 @@
 \newcommand{\Rnneg}{\R_{\geq 0}}
 \newcommand{\Rpos}{\R_{> 0}}
 \newcommand{\ltac}{\ensuremath{\mathcal{L}_{\textrm{tac}}}}
-\newcommand{\Time}{\ensuremath{\tau}}
-\newcommand{\T}{a}
-%% \newcommand{\Tproposed}{T_{?}}
-\newcommand{\Y}{y}
-\newcommand{\Ymax}{\Y}
-\newcommand{\Vmax}{v}
-\newcommand{\Vmin}{V}
-\newcommand{\Vmaxpre}{v_{max\_pre}}
-\newcommand{\Vmaxpost}{V_{max\_post}}
-\newcommand{\Vminpost}{V_{min\_post}}
-\newcommand{\V}{v}
-\newcommand{\Vsense}{v_{sense}}
-\newcommand{\X}{x}
-\newcommand{\Xsense}{x_{sense}}
-\newcommand{\Xmax}{x_{\it max}}
+\newcommand{\Time}{\ensuremath{\contour[2]{black}{$\tau$}}}
+\newcommand{\T}{\tlavar{a}}
+\newcommand{\Tproposed}{\tlavar{T_{?}}}
+\newcommand{\Y}{\tlavar{y}}
+\newcommand{\Ymax}{\tlavar{\Y}}
+\newcommand{\Vmax}{\tlavar{v_{max}}}
+\newcommand{\Vmin}{\tlavar{V}}
+\newcommand{\Vmaxpre}{\tlavar{v_{max\_pre}}}
+\newcommand{\Vmaxpost}{\tlavar{V_{max\_post}}}
+\newcommand{\Vminpost}{\tlavar{V_{min\_post}}}
+\newcommand{\V}{\tlavar{v}}
+\newcommand{\Vsense}{\tlavar{v_{sense}}}
+\newcommand{\X}{\tlavar{x}}
+\newcommand{\Xsense}{\tlavar{x_{sense}}}
+\newcommand{\Xmax}{\tlavar{x_{\it max}}}
 \newcommand{\ub}{\ensuremath{\mathsf{\V_{ub}}}}
-\newcommand{\Vderiv}{\V_{deriv}}
+%\newcommand{\Vderiv}{\V_{deriv}}
 \newcommand{\free}{\textit{free}}
 \newcommand{\nonzero}{\textit{nonzero}}
 \newcommand{\True}{\mathsf{True}}
