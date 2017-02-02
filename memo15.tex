@@ -348,10 +348,73 @@ assistance.
 Proving these four goals completes the proof
 of~\eqref{thm:shim-safe}. Since the inductive invariant was simple and the
 arithmetic reasoning was within the scope of Coq's built-in automation,
-this proof was relatively easy. However, the proof demonstratess the
-general mechanics of proving an invariant of a periodic sampled-data system
-and illustrates how \textsc{SysInd} abstracts some of the tedious reasoning
+this proof was relatively easy. However, the proof demonstrates the general
+mechanics of proving an invariant of a periodic sampled-data system and
+illustrates how \textsc{SysInd} abstracts some of the tedious reasoning
 common to all such systems.
 
 \section{Composition}
 \label{sec:memo15-composition}
+While the velocity controller does guarantee the safety property, it
+requires an assumption about an input, namely that $\V \leq \Vmax$.  We
+could modify the specification of the velocity controller so that it
+specifies the transition behavior of $\Vmax$ in a way that guarantees that
+$\V \leq \Vmax$, thus removing the assumption.  That is, we could modify
+the controller specification to show how $\Vmax$ is produced by adding
+$\Vmax$ to action formulas of the specification.  However, this would
+require reproving the safety theorem of the velocity controller
+(formula~\eqref{thm:shim-safe}).  By leaving the sensor under-specified in
+the velocity controller, we are able to compose the velocity controller
+with \emph{any} system that guarantees $\Always{\V \leq \Vmax}$, without
+needing to reprove the safety theorem of the velocity controller.  In this
+section, we show how to do this for several examples, using a general
+composition rule for our \SysA{} abstraction.
+
+\subsection{Sensor Error}
+Real sensors always have some notion of error.  For example, the readings
+from a barometer may be affected by pressure differences due to local
+weather or GPS may only give accurate information to within several feet.
+In addition, sensors, detect physical, continuous values and compute
+discrete approximations of these values, for example using fixed- or
+floating point.  These finite representations can not hope to be exactly
+the true values of the variables they represent.  While the first type of
+error can be modeled probabilistically, we assume that a sensor can be
+assigned a deterministic conservative upper bound on the error. Thus, it is
+easy to model both kinds of error in our framework since we only need to
+specify predicates on the sensed values.
+
+We start with a simple specification of a sensor that can read the value of
+$\V$ to within some error $\epsilon$.  To do so, we first define
+$\Sensor{S}{\W}{\Delta}$, which takes an LTL state formula $S$ and a
+positive number $\Delta$, and produces an LTL formula:
+\[
+\Sensor{S}{\W}{\Delta} \defined \Sys{(\Unchanged{\vars{\W \wedge S}})}{(\W \wedge S)}{\Delta}
+\]
+This formula expresses the system in which $S$ holds throughout every
+continuous transition, and all variables in the continuous transition are
+unchanged by the discrete transition. The action formula expressing that
+all variables in the continuous transition are unchanged is given by
+$\Unchanged{\vars{\W~\wedge~S}}$. In the actual Coq implementation, the set
+of variables must be supplied manually.
+
+Intuitively, $S$ is intended to express the relationship between the
+physical variable that the sensor is tracking and the actual value it
+reads.  For a sensor of some physical variable $\X$, this relationship is
+$\X - \epsilon \leq \Xsense \leq \X + \epsilon$, where $\Xsense$ is the
+sensed value.  However, for our purposes, we actually need an upper bound
+on $\X$, which we accomplish by offsetting $\Xsense$ by $\epsilon$:
+\[
+\Sense{\X}{\Xmax} \defined
+\X - \epsilon \leq \Xsense \leq \X + \epsilon~\wedge~\Xmax = \Xsense + \epsilon
+\]
+
+In order to satisfy the assumption of the velocity controller, we
+instantiate $\SenseA{}$ with $\V$ and $\Vmax$ and need to prove that for
+any $\W$, $\Delta$, and $\epsilon \geq 0$,
+\begin{equation}
+\vdash \Sense{\V}{\Vmax}~\wedge~\Sensor{\Sense{\V}{\Vmax}}{\W}{\Delta} \rightarrow \Always{\V \leq \Vmax}
+\label{thm:sense-safe}
+\end{equation}
+This theorem follows from \textsc{SysInd} and simple reasoning about linear
+real arithmetic.
+

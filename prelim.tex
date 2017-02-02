@@ -37,6 +37,14 @@ is applied to an action formula, it means that all pairs of temporally
 adjacent states are related by the action formula.  When always is applied
 to a state formula, it means that all states satisfy the property.
 
+For convenience, we also use an operator $\Unchanged{X}$, where $X$ is a
+set of variables, to represent the LTL formula stating that each variable
+in $X$ is equal to its primed counterpart:
+\[
+\Unchanged{\{\tlavar{x_1},\ldots,\tlavar{x_n}\}} \defined
+\tlanextvar{x_1} = \tlavar{x_1}~\wedge~\ldots~\wedge~\tlanextvar{x_n} = \tlavar{x_n}
+\]
+
 Finally, the semantics of formulas is defined in terms of two relations:
 ``models'' (written $tr \models P$) states when a predicate ($P$) holds on
 a trace ($tr$), and ``entails'' (written $P \entails Q$, or just $\entails
