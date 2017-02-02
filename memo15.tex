@@ -418,3 +418,190 @@ any $\W$, $\Delta$, and $\epsilon \geq 0$,
 This theorem follows from \textsc{SysInd} and simple reasoning about linear
 real arithmetic.
 
+\subsection{Composition}
+We are now in a position to compose the sensor module with our velocity
+controller.  First, let \SysA{} composition (\SysConjoin{}) be defined by
+conjoining corresponding formulas:
+\[
+\SysConjoinP{\Sys{D_1}{\W_1}{\Delta}}{\Sys{D_2}{\W_2}{\Delta}} \defined \Sys{\left(D_1 \wedge D_2\right)}{\left(\W_1 \wedge W_2\right)}{\Delta}
+\]
+Note that since all LTL formulas operate on the same state variables,
+conjunction is a very general notion of composition.
+
+Using the definition of \SysConjoin{}, we can state the theorem that the
+composition of our sensor with our velocity controller satisfies the safety
+property $\Always{\V \leq \ub}$ without any assumptions on $\Vmax$:
+\[
+\vdash \SysConjoinP{\Sensor{\Sense{\V}{\Vmax}}{\W}{\Delta}}{\VelShim} \rightarrow \Always{\V \leq \ub}
+\]
+This theorem follows immediately from \textsc{SysCompose}
+(Theorem~\ref{thm:sys-compose}).  \textsc{SysCompose} states that if the
+first system guarantees an invariant, then the second system can assume
+that invariant when it proves its safety condition.  The combined system
+does not need the assumption; it has been satisfied by the first system,
+and has both properties.  Similar to \textsc{SysInd}, \textsc{SysCompose}
+abstracts all of the reasoning for manipulating the internals of the
+\SysA{} abstraction.  Crucially, when we apply \textsc{SysCompose}, we do
+not need to reprove any theorems about the two systems.  Instead we can
+simply use the soundness proofs of the components to satisfy the premises
+of \textsc{SysCompose}.
+
+\begin{theorem}[\textsc{SysCompose}]
+For state formulas $P,Q,I_a,I_b$, action formulas $D_a,D_b$, constant $\Delta \in \R$,
+and evolution predicate $\W$, if the following conditions hold:
+
+\begin{enumerate}[label=\roman*), ref=\roman*]
+\item
+\label{thm:sys-compose-a}
+$\entails I_a~\wedge~\Sys{D_a}{\W}{\Delta} \rightarrow \Always{P}$
+\item
+\label{thm:sys-compose-b}
+$\Always{P} \entails I_b~\wedge~\Sys{D_b}{\W}{\Delta} \rightarrow \Always{Q}$
+\end{enumerate}
+then
+\[
+\entails I_a~\wedge~I_b~\wedge~\SysConjoinP{\Sys{D_a}{\W}{\Delta}}{\Sys{D_b}{\W}{\Delta}} {\rightarrow} \Always{(P \wedge Q)}
+\]
+\label{thm:sys-compose}
+\end{theorem}
+
+\subsection{Delay Compensation}
+When we compose the sensor specification with the velocity controller, we
+implicitly assume that the velocity controller can instantaneously read and
+compute with the value produced by the sensor module, $\Vmax$.  In reality,
+due to communication or computation time, this may not be the case.  It may
+be the case that there is some delay between when the sensor module
+produces a value and when it can actually be used in the controller's
+safety check.  For example, suppose that the sensor module actually outputs
+some value, represented by the variable $\Vmaxpre$ that cannot
+instantaneously be used in a safety check.  The following system
+compensates for this delay
+\[
+\DelayComp \defined \Sys{D}{\W}{\Delta}
+\]
+where $\W \defined \dt{\V}\leq\T - g$ as before and
+\[
+D  \defined \Vmax\tlaprime = \Vmaxpre + \Delta \cdot \mathsf{max}(0, \T\tlaprime - g)
+\]
+In this system, $D$ uses the current value of $\Vmaxpre$ to compute an
+upper bound on $\V$ for the next $\Delta$ time.
+%% , and sets $\Vmax$ equal to it. %% , which can then be used during the
+%% next discrete transition.  Here, $\Vmax\tlaprime$ is set to a value that
+%% will be an upper bound on $\V$ for the next $\Delta$ time.
+
+The correctness property for this system is
+\begin{align}
+\Always{\V \leq \Vmaxpre} \entails I~\wedge~\DelayComp \rightarrow \Always{\V \leq \Vmax} \\
+I \defined \Vmax = \V + \Delta \cdot \mathsf{max}(0, \T - g) \nonumber
+\label{thm:delay-safe}
+\end{align}
+
+Notice that this property relies on the assumption $\Always{\V \leq
+  \Vmaxpre}$.  However, we can use the sensor module above to satisfy this
+assumption and use \textsc{SysCompose} to verify the combined system
+without any assumptions, again without reproving the properties of the
+individual systems:
+\[
+\entails \SysConjoinP{\Sensor{\Sense{\V}{\Vmaxpre}}{\W}{\Delta}}{\DelayComp} \rightarrow \Always{\V \leq \Vmax}
+\]
+Now we have a new system that guarantees the assumption of the velocity
+controller, so we can compose them and easily prove the theorem:
+\[
+\entails \SysConjoinP{\SysConjoinP{\Sensor{\Sense{\V}{\Vmaxpre}}{\W}{\Delta}}{\DelayComp}}{\VelShim} \rightarrow \Always{\V \leq \ub}
+\]
+This approach can be continued for any other sensors or full-blown
+controllers that can be specified and verified within the \SysA{}
+abstraction.
+
+\subsection{Height controller}
+\label{sec:height-shim}
+
+In addition to controlling velocity through a first-derivative, we have
+used our deductive approach to control position through a second
+derivative.  In this section we describe our implementation of a controller
+to enforce an upper bound on height by controlling acceleration.  Note that
+if we were able to directly set the velocity then we could reuse the
+velocity controller (and its proof) simply by renaming the variables.
+Since directly setting velocity is unrealistic, we built a new controller
+that bounds position by setting its second derivative.
+\[
+\HeightShim \defined \Sys{D}{\W}{\Delta}
+\]
+where
+\[
+\begin{array}{rl}
+\W &\defined \dt{\Y} = \V,~\dt{\V}\leq\T - g \\
+D &\defined \quad \tdist{\Vmax}{a_c}{\Delta} {+} \sdist{\Vmax {+} a_c\Delta}{+}  \Ymax \leq \ubY~\wedge~\T\tlaprime {=} \Tproposed \\
+   & ~~~~\vee~~\T\tlaprime {=} \amin \\
+\tdist{\V}{\T}{\Delta} &\defined \V\cdot\Delta+\frac{\T\Delta^2}{2} \\
+\sdist{\V} &\defined -\frac{\V^2}{2\cdot(\amin - g)} \\
+a_{c}  &\defined \max(0,\Tproposed - g ) \qquad \amin  < g
+\end{array}
+\]
+The approach is similar to the approach of the velocity controller.  Each
+time this controller runs, it checks whether it will be able to stop in
+time if it issues the maximum breaking acceleration ($\amin$) the next time
+the controller runs.  The function $\mathsf{td}$ computes a conservative
+upper-bound on the height at the end of $\Delta$ time and $\mathsf{sd}$
+computes the stopping distance assuming $\amin$ breaking acceleration.  We
+have formally proven that the height controller guarantees that $\Y$ never
+exceeds $\ubY$, under the assumption that $\Ymax$ and $\Vmax$ are bounds on
+their respective physical variables.  Formally,
+\[
+\Always{(\Y \leq \Ymax \wedge \V \leq \Vmax)} \entails \HeightShim \rightarrow \Always{\Y \leq \ubY}
+\]
+As with the velocity controller, we can compose the height controller with
+modules guaranteeing the assumptions that the height controller makes on
+$\Ymax$ and $\Vmax$.  Using \textsc{SysCompose}, we can easily prove that
+the composed system guarantees $\Always{\Y \leq \ubY}$ from the individual
+proofs, without reasoning simultaneously about the entire composed system
+and without reproving anything about the individual parts.
+
+Verifying the height controller differs from the velocity controller in two
+ways.  First, the differential equations describing the physical evolution
+of the system, the controller logic, and therefore the inductive invariant
+are all more complex.  This in turn means that the real arithmetic proof
+obligations are substantially more intricate.  In practice, this means that
+the existing foundational, nonlinear real arithmetic decision procedure is
+not able to solve all of the goals, even though the unverified SMT solver
+Z3~\cite{demoura2008z3} solves all goals quickly.  Second, the verification
+used history variables (omitted from the specification in this paper for
+simplicity) to record the value of each physical variable in the last
+discrete transition.  We use these values to describe the safety buffer
+that the system consumes during the continuous transition.  These variables
+do not change the behavior of the controller in any way; they are used only
+for reasoning.
+
+\subsubsection*{Benefits of Composition}
+When verifying our two controllers, the vast majority of the verification
+effort was devoted to foundationally reasoning about real arithmetic proof
+obligations.  Our composition technique takes a step towards reducing that
+burden.  As a point of comparison with the non-compositional approach, our
+first implementation of the height controller was monolithic, including all
+of the code for reasoning about delay compensation (but not sensor error).
+The result was more complex real arithmetic goals containing larger
+expressions and more variables.  When we verified the height controller
+compositionally, the arithmetic proof obligations were simpler and, as a
+result, required less manual proof effort to simplify the goals into a form
+that the foundational decision procedures could handle.  Moreover,
+verifying the height controller with the noisy sensor was simply a matter
+of combining the independent proofs using \textsc{SysCompose}.  This is a
+promising result considering that the number of variables influences the
+complexity of the inductive invariant which is directly related to
+complexity of automatic verification and difficulty of manual arithmetic
+proofs when automation fails.
+
+\subsubsection*{Finding Inductive Invariants}
+In general, one of the challenges of formal verification lies in building a
+suitable inductive invariant, and hybrid systems are no exception.
+However, we have found that developing the inductive invariant is actually
+a part of the process of developing the controller.  For example, when
+building the velocity controller, we first built the inductive invariant
+stating that the thrust is safe until the next time the controller runs.
+We then built a controller to compute a thrust that will be safe until the
+next time it runs; this followed naturally from the inductive invariant.
+This means that we have not found the task of finding an inductive
+invariant to be an \emph{additional} burden on top of the necessary task of
+building the controller itself. Instead, we found these two tasks to be
+naturally related, regardless of whether or not one performs foundational
+verification.
