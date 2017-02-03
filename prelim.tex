@@ -128,21 +128,32 @@ The second and third conjuncts relate the current state to the value of the
 solution $f$ at 0 and the next state to the value of $f$ at time $r$.
 
 At first glance, this definition of continuous transitions may look strange
-since it seems to allow the trace to ``skip'' states.  However, while a
-single trace may skip a certain state during a continuous transition,
-another trace does include that state because the definition of
-$\Continuous{}$ captures \emph{all} possible continuous transitions of any
-duration.  Thus, a formula of the form
-$I\wedge\always{(\Sys{D}{\W}{\Delta})}$ captures all possible sequences of
-discrete observations of a system.  The soundness of this encoding is
+since it seems to allow the trace to ``skip'' states -- that is, any single
+sequence of states satisfying \SysA{} does not capture all intermediate
+states of the system. Instead, the discrete trace captures finite
+observations along the continuous evolution of the physical world.  In
+fact, it may seem as though a sequence of states is a poor fit for
+describing the continuously evolving physical world since time and other
+continuous variables can only advance in discrete steps. The core of the
+argument lies in the fact that in LTL we prove properties of \emph{all}
+sequences of states rather than properties of a single sequence of
+states. When we prove $\entails \Init\wedge\Sys{D}{\W}{\Delta} \rightarrow
+P$ for some property $P$, we are proving that $P$ holds on all sequences of
+states that satisfy $\Init\wedge\Sys{D}{\W}{\Delta}$.  In other words, we
+are proving properties of all possible sequences of observations of the
+hybrid system's state.  While a single trace may skip a certain state
+during a continuous transition, another trace does include that state
+because the definition of $\Continuous{}$ captures \emph{all} possible
+continuous transitions of any duration. The soundness of this encoding is
 argued by Lamport in~\cite{lamport2005real}.
 
-The timing constraint is captured using the variable \Time{} (not mentioned
-in $D$ or $\W$), which tracks the time that elapses between successive
-transitions of the discrete controller.  During the continuous evolution of
-the system, \Time{} decreases at the same rate as time, i.e. $\dt{\Time{}} =
--1$, and $\tlanextvar{\Time{}} \geq 0$ ensures that no more than $\Delta$
-time elapses between successive discrete transitions of the controller.
-The discrete transition occurs when the timer has expired ($\Time{} = 0$);
-this transition resets the timer to a positive value that is at most
-$\Delta$.
+Finally, the definition of \SysA{} also expresses that at most $\Delta$
+time elapse between executions of the controller. This timing constraint is
+captured using the variable \Time{} (not mentioned in $D$ or $\W$), which
+tracks the time that elapses between successive transitions of the discrete
+controller.  During the continuous evolution of the system, \Time{}
+decreases at the same rate as time, i.e. $\dt{\Time{}} = -1$, and
+$\tlanextvar{\Time{}} \geq 0$ ensures that no more than $\Delta$ time
+elapses between successive discrete transitions of the controller.  The
+discrete transition occurs when the timer has expired ($\Time{} = 0$); this
+transition resets the timer to a positive value that is at most $\Delta$.

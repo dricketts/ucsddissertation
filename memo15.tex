@@ -76,7 +76,6 @@ in Section~\ref{sec:arch}.
 \begin{figure}[t]
 \centering
 
-
 \begin{subfigure}[t]{.49\linewidth}
   \centering
   \begin{tikzpicture}
@@ -605,3 +604,175 @@ invariant to be an \emph{additional} burden on top of the necessary task of
 building the controller itself. Instead, we found these two tasks to be
 naturally related, regardless of whether or not one performs foundational
 verification.
+
+\section{From Model to Reality}
+\label{sec:experiences}
+In addition to modeling and verifying our systems, we also implemented both
+the velocity and height controllers to run on a 3D Robotics Iris+.  Running
+the system whose model we verify is important because it allows us to
+experimentally evaluate the gap between the model and the actual system
+that we run.  We can divide this gap into two pieces: the gap due to our
+model of the physical world (Section~\ref{sec:world-model}), and the gap
+due to our model of the discrete controller
+(Section~\ref{sec:discrete-model}).  We conclude by discussing some of the
+insights that we gained from running our code on an actual quadcopter
+(Section~\ref{sec:results}).
+
+\subsection{A Small Model in a Big World}
+\label{sec:world-model}
+
+The primary gap between the physical world and our model lies in the fact
+that our model captures only the vertical dimension.  In particular, it
+does not model the orientation of the quadcopter and therefore does not
+capture the direction of thrust.  However, a model that includes attitude
+is a refinement of the world model that our specifications use.  This means
+that all traces allowed by a model including attitude are also allowed by
+the world model used in our specifications.  As we explained in
+Section~\ref{sec:sys}, this is because our specifications model the world
+using differential \emph{inequalities} stating that the vertical thrust is
+upper-bounded by the thrust produced by the motors.  This relaxation of the
+specification means that we must prove properties of a more liberal system,
+but it allows us to use our results in the more constrained, richer model
+which includes attitude.
+
+The other discrepancies between our model and the real world are common
+simplifying assumptions of models for verification purposes.  For example,
+modeling external factors such as wind, air resistance, etc. would be
+possible by adding extra terms into the differential world description.
+Finally, our model also relies on the common assumption of instantaneous
+change of discrete variables such as thrust.  In principle, output values
+such as thrust actually change over a very small amount of time.  While
+this may seem like a reasonable assumption, it nonetheless constitutes a
+formal discrepancy.
+
+\subsection{From Relations to Bits}
+\label{sec:discrete-model}
+
+Our description of the autpilot architecture in Section~\ref{sec:example}
+describes the verified controller as the last piece of code that runs
+before signals are sent to the motors.  This is not strictly necessary.
+There are advantages and disadvantages to running the verified controller
+at different points.
+
+
+\begin{figure}[t]
+\centering
+
+\begin{subfigure}[t]{.3\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum width=1cm]
+
+    \node[wnode,text width=2cm,align=center] (existing)  {Existing Control Software} ;
+
+    \node[draw=black,above=of existing,minimum height=0.5cm,xshift=0.7cm] (user) {User} ;
+    \node[draw=black,above=of existing,minimum height=0.6cm,xshift=-1cm] (sensor) {Sensors} ;
+
+    \node[wnode,below=of existing] (mixing)  {Mixing Code} ;
+    \node[wnode,below=of mixing] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([xshift=0.12cm + \i * 0.3 cm]#1.south) -- ([xshift=0.12cm + \i * 0.3 cm]#2.north) ;}}
+
+    \quadline{existing}{mixing}
+    \quadline{mixing}{motor}
+    \draw[-latex] let \p1 = (user.south),
+                      \p2 = (existing.north) in
+                  (user.south) -- (\x1,\y2) ;
+    \draw[-latex] let \p1 = (sensor.south),
+                      \p2 = (existing.north) in
+                  ([xshift=0.2cm]sensor.south) -- (\x1+0.2cm,\y2) ;
+
+
+
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:memo15-arch-full-without}
+\end{subfigure}
+~
+\begin{subfigure}[t]{.3\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum width=1cm]
+
+    \node[wnode] (mixing)  {Mixing Code} ;
+    \node[wnode,above=of mixing,text width=2cm,align=center,yshift=1cm] (existing)  {Existing Control Software} ;
+
+
+    \node[draw=black,above=of existing,minimum height=0.5cm,xshift=0.7cm] (user) {User} ;
+    \node[draw=black,above=of existing,minimum height=0.6cm,xshift=-1cm] (sensor) {Sensors} ;
+
+    \node[wnode,below=of mixing] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([xshift=0.12cm + \i * 0.3 cm]#1.south) -- ([xshift=0.12cm + \i * 0.3 cm]#2.north) ;}}
+
+    \quadline{existing}{mixing}
+    \quadline{mixing}{motor}
+    \node[fill=black,above=of mixing,text=white,align=center,xshift=-.8cm] (mon) {Ctrl} ;
+    \draw[-latex] let \p1 = (user.south),
+                      \p2 = (existing.north) in
+                  (user.south) -- (\x1,\y2) ;
+    \draw[-latex] let \p1 = (sensor.south),
+                      \p2 = (existing.north) in
+                  ([xshift=0.2cm]sensor.south) -- (\x1+0.2cm,\y2) ;
+    \draw[-latex] ([xshift=-0.6cm]sensor.south) |- (mon.west) ;
+    \draw[-latex] let \p1 = (mon.north) in
+                  ([xshift=-0.48cm]existing.south) -- (\x1+0.3cm,\y1) ;
+
+
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:memo15-arch-full-before}
+\end{subfigure}
+~
+\begin{subfigure}[t]{.3\linewidth}
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum width=1cm]
+
+    \node[fill=black,text=white,text width=2cm,align=center,minimum height=1cm] (mon) at (0,0) {Verified Control} ;
+    \node[wnode,above=of mon] (mixing)  {Mixing Code} ;
+    \node[wnode,above=of mixing,text width=2cm,align=center] (existing)  {Existing Control Software} ;
+
+    \node[draw=black,above=of existing,minimum height=0.5cm,xshift=0.7cm] (user) {User} ;
+    \node[draw=black,above=of existing,minimum height=0.6cm,xshift=-1cm] (sensor) {Sensors} ;
+
+    \node[wnode,below=of mon] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([xshift=0.12cm + \i * 0.3 cm]#1.south) -- ([xshift=0.12cm + \i * 0.3 cm]#2.north) ;}}
+
+    \quadline{mon}{motor}
+    \quadline{existing}{mixing}
+    \quadline{mixing}{mon}
+    \draw[-latex] let \p1 = (user.south),
+                      \p2 = (existing.north) in
+                  (user.south) -- (\x1,\y2) ;
+    \draw[-latex] let \p1 = (sensor.south),
+                      \p2 = (existing.north) in
+                  ([xshift=0.2cm]sensor.south) -- (\x1+0.2cm,\y2) ;
+    \draw[-latex] ([xshift=-0.5cm]sensor.south) |- (mon.west) ;
+
+
+  \end{tikzpicture}
+  \caption{}
+  \label{fig:memo15-arch-full-after}
+\end{subfigure}
+
+\caption{A depiction of UAV architecture~\ref{fig:memo15-arch-full-without}
+  without any modification, \ref{fig:memo15-arch-full-before} with our
+  controller running before the motor mixing code, and
+  \ref{fig:memo15-arch-full-before} with our controller running after the
+  motor mixing code. Black boxes denote verified code.}
+\label{fig:arch}
+\end{figure}
