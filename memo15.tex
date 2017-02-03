@@ -571,7 +571,7 @@ that the system consumes during the continuous transition.  These variables
 do not change the behavior of the controller in any way; they are used only
 for reasoning.
 
-\subsubsection*{Benefits of Composition}
+\paragraph*{Benefits of Composition}
 When verifying our two controllers, the vast majority of the verification
 effort was devoted to foundationally reasoning about real arithmetic proof
 obligations.  Our composition technique takes a step towards reducing that
@@ -590,7 +590,7 @@ complexity of the inductive invariant which is directly related to
 complexity of automatic verification and difficulty of manual arithmetic
 proofs when automation fails.
 
-\subsubsection*{Finding Inductive Invariants}
+\paragraph*{Finding Inductive Invariants}
 In general, one of the challenges of formal verification lies in building a
 suitable inductive invariant, and hybrid systems are no exception.
 However, we have found that developing the inductive invariant is actually
@@ -888,3 +888,113 @@ Finally, we also tried our velocity controller with a small negative
 velocity as the bound. With the throttle stick engaged to the maximum, this
 caused the quadcopter to land while allowing us to control other aspects of
 the flight such as attitude and x-y positioning.
+
+\section{Discussion}
+\label{sec:discussion}
+
+In this section we discuss the motivation for our design decisions.  We
+begin by motivating the use of foundational proof assistants including some
+anecdotal evidence for the benefits of foundational proofs. Next, we
+describe the challenge of real arithmetic reasoning within a foundational
+proof assistant. Finally, we discuss the design of our logic, particularly
+the decision to use a global state.
+
+\paragraph*{Benefits of foundational proof assistants}
+\label{sec:proof-assistant}
+
+Foundational proof assistants provide strong guarantees: they require all
+proofs to be done in full formal detail, with an unparalleled attention to
+every single detail.  This attention to detail can find subtle but critical
+problems that otherwise might go unnoticed.  For example, we initially
+axiomatized differential induction instead of proving it sound within our
+framework.  We used this axiom to ``verify'' a version of the height
+controller that was in fact not safe (note also that the height controller
+itself is not trivial, and it is actually quite easy to get it wrong).
+This left us in an unfortunate state of blissful ignorance: we had a subtle
+bug in our controller, but we did not uncover it at first, \emph{even
+  though we were applying formal methods}, because our statement of
+differential induction was subtly incorrect, and we had not yet done the
+foundational proof for differential induction.  It was only when we
+attempted to foundationally prove, rather than axiomatize, differential
+induction that we found our initial phrasing of the proof rule to be
+unsound.  Fixing the statement led us to find several issues with earlier
+versions of our formalism that appeared reasonable but were, in fact,
+insufficiently constrained and therefore not correct.  These anecdotes
+underscore the key benefit of foundational proofs: they provide a high
+level of confidence, as has also been shown experimentally in previous
+studies~\cite{yang2011understanding-compiler-bugs}.
+
+In addition to the foundational guarantees, proof assistants provide very
+expressive, general purpose logics, which can serve as the foundation of a
+wide range of interesting theories.  We have leveraged the standard
+library's real analysis theories to reason about real arithmetic and
+calculus.  Future work can also make formal connections with actual
+controller implementations, as the semantics of C~\cite{leroy2009compcert}
+and floating point arithmetic~\cite{floqc11} are expressible. Furthermore,
+as this dissertation emphasizes and future chapters reiterate, using Coq
+allows us to use powerful, domain specific proof rules without sacrificing
+soundness. In general, the full power of Coq's rich logic and all of the
+theories built up in it are at our disposal.
+
+The deductive reasoning style embodied in proof assistants provides useful
+feedback when verification fails since the user is guiding the proof.  When
+a proof does not work, the user is aware of all of the steps taken in the
+development and often learns enough from the failed proof to be able to fix
+the system.  This feedback is complementary to counter-examples provided by
+tools such as Z3~\cite{demoura2008z3}, which do not provide foundational
+proofs for nonlinear real arithmetic.  This process of building proofs also
+makes the developer more aware of the minimal assumptions that a hybrid
+system is making and the maximal guarantees that it can ensure.  In
+practice, we have found that proofs lead us to find more general, and
+therefore compositional, interfaces that are easier to satisfy.
+
+Proof assistants also allow us to build automation without sacrificing
+foundational proofs.  In this work, much of that automation surrounds our
+embedding of temporal logic.  This automation is scripted in \ltac, which
+means that the automation lies completely outside of our trusted computing
+base.  This property has allowed us to rapidly iterate on the automation
+without needing to worry about its soundness.
+
+\paragraph*{Automation for real arithmetic}
+The biggest drawback to the use of foundational proof assistants for
+formalizing hybrid systems is the lack of good automation for reasoning
+about real arithmetic.  For example, the only nonlinear real arithmetic
+decision procedure currently implemented for Coq is
+\texttt{psatz}~\cite{besson2007micromega} which can be extremely slow, even
+for simple goals.  This is especially true when the goal is unprovable;
+\texttt{psatz} can run for hours before overflowing the stack. Moreover,
+\texttt{psatz} never returns a counter example, making it even more
+challenging to debug false arithmetic conjectures.  This means that we
+spent a lot of time trying to prove goals that are ultimately unprovable.
+However, modern SMT solvers such as Z3, Yices, and CVC4 have good support
+for reasoning about real arithmetic.  We eventually started passing real
+arithmetic goals to Z3 to sanity check them before running them through
+\texttt{psatz}.  The value of doing this throughout the development process
+could easily be measured in hours (or days) of productivity gained.  Our
+composition theorems are another step towards reducing the proof burden by
+factoring the problem into more manageable pieces.  We believe that even
+more abstraction is possible by codifying the ``tricks of the trade'' as
+formal, general-purpose proof rules.
+
+\paragraph*{Global state and unconstrainted transitions}
+Unlike in a programming language where \texttt{x = y + 1} means that
+\texttt{x} changes and the rest of the variables stays the same, in our
+logic (like in TLA), $\tlanextvar{x} = \tlavar{y} + 1$ says nothing about
+the behavior of variables other than $\tlavar{x}$ and $\tlavar{y}$. Thus,
+other variables can transition arbitrarily.  This allows other components
+to execute ``in parallel'' on their own state simply by joining the
+programs using logical conjunction. In other words, parallel composition is
+trivial to express. This, in turn, made it simple to express the definition
+of $\SysConjoinP{}$ and reason about the composition of our height and
+velocity controllers with sensor error and delay compensation. We will see
+further benefits of this approach in Chapter~\ref{chap:emsoft16}.
+
+The primary drawback to this approach is that care must be taken to avoid
+these programs from interfering with one another in unexpected ways.  We
+avoided this problem by enhancing our formalism with a mechanism for
+renaming variables in LTL formulas. When one composes several components,
+variable renaming must occur at the global level to avoid unintentional
+conflicts. While this can be very tedious for programming languages, we
+feel that for specifications like the ones in this dissertation, the
+benefits outweight the drawbacks.
+
