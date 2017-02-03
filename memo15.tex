@@ -776,3 +776,115 @@ at different points.
   motor mixing code. Black boxes denote verified code.}
 \label{fig:arch}
 \end{figure}
+
+Figure~\ref{fig:memo15-arch-full-without} depicts a version of the
+\ardupilot{} architecture without any of our modifications.  The existing
+control software takes input from the user and sensors and outputs a
+desired throttle, roll torque, pitch torque, and yaw torque to the ``motor
+mixer'' module.  This module then computes the signals to send to each of
+the four motors to best approximate the desired behavior.  The
+approximation is necessary because it is not always possible to achieve all
+four desired values simultaneously since the quadcopter relies on
+differences between motor speeds to induce non-zero torques.
+
+One place to execute our controller is before the motor mixing module
+(Figure~\ref{fig:memo15-arch-full-before}).  At this point, our controller
+executes directly on the desired throttle of the higher-level controller.
+To meet the interface of our specifications of both the height and velocity
+controllers, we must convert this input into a desired vertical thrust
+($\Tproposed$).  We must also convert the thrust output by the controllers ($\T$)
+into a desired throttle that serves as the input to the mixer module.  We
+accomplish both tasks by multiplying the throttle by a constant which we
+determined empirically.  We discuss the consequence of this choice in
+Section~\ref{sec:results}. As we have already discussed, this will actually
+provide an upper bound on vertical acceleration, an acceptable input to our
+controllers.  Placing the controller here allows the motor mixer to optimize the engine
+outputs to achieve the other parameters (attitude torques) as best it can.
+However, it also requires us to trust that the motor mixer module never
+exceeds the desired throttle, a property that we believe to hold but have
+not formally verified.
+
+Running after the motor mixer (Figure~\ref{fig:memo15-arch-full-after})
+allows us to remove the mixer from the trusted computing base.  To meet the
+interface at this level, we must translate between the motor signals and
+the induced thrust.  We again accomplish this using an empirically
+determined constant that we use to scale each of the motor signals.  If the
+controller rejects the proposed thrust, then it must compute new signals
+for the motors to induce a safe thrust.  There are many ways to achieve a
+particular total thrust by adjusting four motor signals.  In order to
+minimize the affect of the controller on attitude dynamics, we linearly
+scale back each of the motor values to achieve the thrust output by the
+controller.
+
+Regardless of where we insert the controller, the trusted computing base
+still includes the sensor fusion code that runs on the quadcopter. This
+code takes input from sensors and computes an estimation of the state
+(e.g. position, velocity, attitude, etc.) of the vehicle. We use this code
+to provide bounds ($\Vmax$ and $\Ymax$) on physical variables, in essence
+treating the sensor fusion code as an unverified sensor module.  This code
+is substantially larger and more complex than the motor mixing code and we
+are interested in applying our techniques to reason about it in the future.
+We are also trusting our (currently manual) translation of the discrete
+controller model from LTL to C code.  This translation includes picking an
+appropriate value for $\Delta$, the maximum time between discrete
+transitions.  However, any upper bound suffices since our proofs hold for
+all $\Delta$.  Finally, we ignore the formal gap between real arithmetic
+used in our models and floating-point arithmetic used in the running code.
+Future work can investigate closing this formal gap using Coq's libary for
+reasoning about floating point computation~\cite{flocq11}.
+
+\subsection{Empirical Results}
+\label{sec:results}
+Evaluating empirical results of this nature is important when exploring
+models.  For example, when we first described our controller logic to an expert
+pilot he was concerned that disengaging the motors so harshly might have a
+destabilizing effect on the quadcopter.  It was only experimentally that we
+learned that this was not the case.
+
+Experimentally, both the velocity and the height controller enforce their
+respective safety properties.  The height and velocity controllers allowed
+the quadcoptor to go right up to the provided height or velocity bounds.
+In some rare cases, the quadcopter went above the bounds, by a small
+amount, for example about ten centimeters for a height bound of 30 meters.
+We attribute these small violations to un-modeled forces such as wind,
+sensor inaccuracy, and inaccuracy in the measured relationship between
+throttle/motor signals and thrust induced.  In fact, we found the measured
+relationship between signals and thrust to have a significant impact on the
+behavior of the quadcopter and was perhaps the greatest source of error
+that we noticed.  We were careful to be conservative when measuring these
+constants; since our controllers both provide upper bounds, we can safely
+err on the side of constants that provide upper bounds on acceleration.
+Future work can investigate running our controllers on top of closed-loop
+acceleration controllers to avoid the need for these empirical constants.
+
+We flew the quadcopter in both loiter and stabilize modes, and also had the
+quadcopter approach the height and velocity bounds from a variety of
+velocities and orientations. In loiter mode, the pilot sends desired
+velocity commands to the vehicle, while in stabilize mode, the pilot
+commands desired attitudes. In all cases, the controllers enforced their
+safety properties with rare, small violations, and allowed us to retain
+control over the quadcopter.  We never ran both controllers simultaneously
+because we have no verification results for this scenario.  Fundamentally,
+to compose the controllers we are obliged to show that the controllers do
+not conflict with one another, e.g. by requiring different remedial
+actions. We investigate this further in Chapter~\ref{chap:emsoft16}.
+
+Also, recall that our height controller is conservative in the way that it
+estimates upward thrust: it assumes that the thrust requested by the
+higher-level controller would be applied directly in the upward direction,
+even if the attitude of the quadcoptor is not upward.  As a result, if the
+attitude is not level, our height controller assumes that there is a larger
+upward thrust than really occurs, and so it will engage earlier than it
+needs to.  We noticed this effect experimentally: when approaching the
+height through a non-level attitude, the quadcopter would stop ascending at
+a lower height than the actual bound.  Furthermore, when the quadcopter is
+at the height bound with the controller engaged and the upward throttle
+stick engaged to the maximum, if we start rolling or pitching, the
+quadcopter will not only move in the x-y direction, but it will also
+descend slightly, since as the orientation changes, the height controller
+becomes more conservative.
+
+Finally, we also tried our velocity controller with a small negative
+velocity as the bound. With the throttle stick engaged to the maximum, this
+caused the quadcopter to land while allowing us to control other aspects of
+the flight such as attitude and x-y positioning.
