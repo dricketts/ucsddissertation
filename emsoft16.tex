@@ -352,3 +352,232 @@ the following theorem:
 \end{array}
 \]
 \end{theorem}
+
+\section{Modular Sampled-data Systems}
+\label{sec:compositional-monitors}
+
+In this section, we show how to use preservation and \progress{} to reason
+modularly about sampled-data systems.  In particular, for each of our three
+operators (substitution, disjunction, and conjunction), we present theorems
+that state formal conditions under which application of the operator
+guarantees preservation and \progress{}.  We illustrate each of the
+operators and corresponding theorems by building verified
+state-constraining controllers for quadcopters.  This allows us to
+construct and verify controllers enforcing policies such as ``do not fly
+above 400 feet'' (FAA regulation for recreational drones), ``do not fly
+within 5 miles of an airport'', and ``do not fly within 5 feet of the
+pilot.''
+
+It is important to note that all of the state-constraining controllers that
+we verify are \emph{non-deterministic}.  This means that the discrete
+transitions do not compute a single value for each control variable
+(e.g. acceleration) but instead describe a set of allowed values that
+ensure the desired state-constraint.  As we will see, this non-determinism
+is crucial for conjunctive composition
+(Section~\ref{sec:conjunctive-composition}).  In Section~\ref{sec:eval}, we
+discuss how the actual implementation of these controllers resolves this
+non-determinism.
+
+\paragraph{Building blocks}
+As the basic building blocks of our development, we start with the two
+sampled-data systems that are minor variants on the ones from
+Chapter~\ref{chap:memo15}. Both operate in one spatial dimension, i.e.
+\[\begin{array}{rcl}
+\W_{1D} & \triangleq & \dt{\tlavar{y}} = \tlavar{v} \wedge \dt{\tlavar{v}} = \tlavar{a} \wedge \dt{\tlavar{a}} = 0
+\end{array}
+\]
+The two controllers each enforce constant bounds on a state variable by
+controlling acceleration (\tlavar{a}).  The first-derivative controller
+(\derivShimv) bounds velocity using acceleration (the first-derivative of
+velocity).  The second-derivative controller (\derivShimx) bounds position
+using acceleration (the second-derivative of position).  To ensure that
+\derivShimx{} can stop before violating the boundary, the controller is
+parameterized by \Tmin which represents the braking acceleration and
+smallest possible acceleration (and is negative).
+Figure~\ref{fig:formal-monitors} gives the discrete transitions and
+inductive invariants for the two systems. Each inductive invariant states
+that, given the time until the next discrete transition, the system can
+stop before the boundary.
+
+
+\begin{figure}[t]
+
+\textbf{First-Derivative Controller} ($\derivShimv = \Sys{D_\partial}{W_{1D}}{\Delta}$)
+\[\begin{array}{rl}
+D_\partial \triangleq & \Ca\tlaprime \wedge (\tlanextvar{a} \cdot \Delta + \tlavar{v} \leq ub \vee \tlanextvar{a} \leq 0) \\
+\invShimv \triangleq & (\tlavar{a} < 0 \rightarrow \tlavar{v} \leq ub) \wedge
+(\tlavar{a} \geq 0 \rightarrow \tlavar{a} \cdot \tlavar{\tau} + \tlavar{v} \leq ub) \\
+\end{array}
+\]
+
+\textbf{Second-Derivative Controller} ($\derivShimx = \Sys{D_{\partial^2}}{W_{1D}}{\Delta}$)
+\[
+\begin{array}{rl}
+D_{\partial^2} \triangleq & (0 \leq \tlavar{v} + \tlanextvar{a} \cdot \Delta \rightarrow \\
+& \;\quad \tdist{\tlavar{v}}{\tlanextvar{a}}{\Delta} + \sdist{\tlavar{v} + \tlanextvar{a}\cdot\Delta} + \tlavar{y} \leq \ubY) \\
+& (\tlavar{v} + \tlanextvar{a} \cdot \Delta \leq 0 \wedge 0 < \tlavar{v} \rightarrow \\
+& \;\quad \tdist{\tlavar{v}}{\tlanextvar{a}}{\frac{-\tlavar{v}}{\tlanextvar{a}}} + \tlavar{y} \leq \ubY) \wedge \Ca\tlaprime \\
+\invShimx \triangleq & \forall t : \mathbb{R}, 0 \leq t \leq \tlavar{\tau} \rightarrow \\
+& \;\quad \tlavar{\Y} {+} \tdist{\tlavar{\V}}{\tlavar{a}}{t} + \sdist {\max(0,\tlavar{\V} + \tlavar{a} \cdot t)} \leq \ubY
+\end{array}
+\]
+\[
+\begin{array}{ccc}
+\tdist{\V}{a}{\Delta} \triangleq \V\cdot\Delta+\frac{a\cdot\Delta^2}{2} & \qquad &
+\sdist{\V} \triangleq -\frac{\V^2}{2\cdot a_{\mathsf{min}}} \\
+\Ca \triangleq \amin \leq \tlavar{a} & \qquad & \amin  < 0
+\end{array}
+\]
+
+\caption{Discrete transitions and inductive invariants for our building blocks.}
+\label{fig:formal-monitors}
+\end{figure}
+
+In Chapter~\ref{chap:memo15}, we verified variants on both of these
+controllers in a global style but did \emph{not} compose them.  For the
+work in this chapter, we ported each of the global proofs to our local,
+modular specification by extracting the inductive invariant (which was
+stated explicitly in the proof) and the preservation proof (which formed
+the inductive case).  Beyond extracting the safety proofs, we also had to
+verify \progress{}, which was not addressed in Chapter~\ref{chap:memo15},
+but is trivial for such basic modules.  In the remainder of this section,
+we denote the preservation and \progress{} proofs of the two controllers
+by: \ProofRule{$\partial$-Preserves},
+\ProofRule{$\partial$-\xmakefirstuc{\progress{}}},
+\ProofRule{$\partial^2$-Preserves}, and
+\ProofRule{$\partial^2$-\xmakefirstuc{\progress{}}}.
+
+\paragraph{Quadcopter Controller}
+\label{sec:quadcopter-dynamics}
+To build and verify controllers for quadcopters, we need a model of the
+physical dynamics of a quadcopter, called $\W_{QC}$:
+\[\begin{array}{rl}
+\W_{QC} \triangleq & \left(\begin{array}{ll}
+       & \dt{\tlavar{x}} = \tlavar{v_x} \wedge \dt{\tlavar{y}} = \tlavar{v_y} \wedge \dt{\tlavar{z}} = \tlavar{v_z} \\
+\wedge & \dt{\tlavar{v_x}} = \tlavar{T} \cos \tlavar{\roll} \sin \tlavar{\pitch} \\
+\wedge & \dt{\tlavar{v_y}} = -\tlavar{T} \sin \tlavar{\roll} \\
+\wedge & \dt{\tlavar{v_z}} = \tlavar{T} \cos \tlavar{\roll} \cos \tlavar{\pitch} - g \\
+\wedge & \dt{\tlavar{\roll}} = 0 \wedge \dt{\tlavar{\pitch}} = 0 \wedge \dt{\tlavar{T}} = 0
+\end{array}\right)
+\end{array}
+\]
+
+\begin{figure}
+\centering
+
+\newcommand{\rotateRPY}[4][0/0/0]% point to be saved to \savedxyz, roll, pitch, yaw
+{   \pgfmathsetmacro{\rollangle}{#2}
+   \pgfmathsetmacro{\pitchangle}{#3}
+   \pgfmathsetmacro{\yawangle}{#4}
+
+   % to what vector is the x unit vector transformed, and which 2D vector is this?
+   \pgfmathsetmacro{\newxx}{cos(\yawangle)*cos(\pitchangle)}% a
+   \pgfmathsetmacro{\newxy}{sin(\yawangle)*cos(\pitchangle)}% d
+   \pgfmathsetmacro{\newxz}{-sin(\pitchangle)}% g
+   \path (\newxx,\newxy,\newxz);
+   \pgfgetlastxy{\nxx}{\nxy};
+
+   % to what vector is the y unit vector transformed, and which 2D vector is this?
+   \pgfmathsetmacro{\newyx}{cos(\yawangle)*sin(\pitchangle)*sin(\rollangle)-sin(\yawangle)*cos(\rollangle)}% b
+   \pgfmathsetmacro{\newyy}{sin(\yawangle)*sin(\pitchangle)*sin(\rollangle)+ cos(\yawangle)*cos(\rollangle)}% e
+   \pgfmathsetmacro{\newyz}{cos(\pitchangle)*sin(\rollangle)}% h
+   \path (\newyx,\newyy,\newyz);
+   \pgfgetlastxy{\nyx}{\nyy};
+
+   % to what vector is the z unit vector transformed, and which 2D vector is this?
+   \pgfmathsetmacro{\newzx}{cos(\yawangle)*sin(\pitchangle)*cos(\rollangle)+ sin(\yawangle)*sin(\rollangle)}
+   \pgfmathsetmacro{\newzy}{sin(\yawangle)*sin(\pitchangle)*cos(\rollangle)-cos(\yawangle)*sin(\rollangle)}
+   \pgfmathsetmacro{\newzz}{cos(\pitchangle)*cos(\rollangle)}
+   \path (\newzx,\newzy,\newzz);
+   \pgfgetlastxy{\nzx}{\nzy};
+
+   % transform the point given by #1
+   \foreach \x/\y/\z in {#1}
+   {   \pgfmathsetmacro{\transformedx}{\x*\newxx+\y*\newyx+\z*\newzx}
+       \pgfmathsetmacro{\transformedy}{\x*\newxy+\y*\newyy+\z*\newzy}
+       \pgfmathsetmacro{\transformedz}{\x*\newxz+\y*\newyz+\z*\newzz}
+       \xdef\savedx{\transformedx}
+       \xdef\savedy{\transformedy}
+       \xdef\savedz{\transformedz}
+   }
+}
+
+\tikzset{RPY/.style={x={(\nxx,\nxy)},y={(\nyx,\nyy)},z={(\nzx,\nzy)}}}
+
+\begin{tikzpicture}
+
+ \begin{scope}[yshift=-0.75cm]
+ \draw[-latex,dashed] (-0.3,0,0) to node[near end,above] {$x$} (1,0,0) node[right] {\footnotesize pitch axis (\tlavar{\pitch})} ;
+ \draw[-latex,dashed] (0,-0.3,0) to node[near end,right] {$z$} (0,1,0) ;
+ \draw[-latex,dashed] (0,0,-0.3) to node[near end,left] {$y$} (0,0,1) node[below] {\footnotesize roll axis (\tlavar{\roll})} ;
+ \node[anchor=east] at (-0.1,0.3,0) {\footnotesize ``Earth frame''} ;
+ \end{scope}
+
+ \rotateRPY{30}{-20}{0}
+
+ \begin{scope}[xshift=4cm,yshift=-0.5cm]
+
+   \draw[dotted] (-0.3,0,0) -- (0.5,0,0) ;
+   \draw[dotted] (0,-0.3,0) -- (0,0.5,0) ;
+   \draw[dotted] (0,0,-0.3) -- (0,0,0.5) ;
+
+   \begin{scope}[RPY]
+   \draw (0,0,0) to (0.5,0,0) ;
+   \draw[-latex] (0,0,0) to node[near end,left] {\tlavar{T}} (0,0.5,0) ;
+   \draw (0,0,0) to (0,0,0.5) ;
+   \fill[black] (0,0,0) circle (0.05cm) ;
+   \end{scope}
+
+   \draw[latex-,gray] (0,0,0) to[bend right] (0.5,0.5) node[inner sep=0.1,anchor=south,black] {\footnotesize quadcopter} ; 
+
+   \draw[-latex] (0,0,0) to node[near end,right] {$g$} (0,-1,0) ;
+ \end{scope}
+
+\end{tikzpicture}
+
+
+\caption{Free-body diagram and dynamics of the quadcopter.}
+\label{fig:free-body}
+\end{figure}
+
+Here \tlavar{T} represents the combined thrust of the motors (normalized
+with respect to the mass of the quadcopter), \tlavar{\pitch} represents the
+pitch (the angle around the $y$-axis), and \tlavar{\roll} represents the
+roll (the angle around the $x$-axis). Figure~\ref{fig:free-body} depicts
+this graphically in a free-body diagram. Our model is based on the
+simplifying assumption (called the ``small angle condition'') that a
+trusted attitude controller can instantaneously achieve any pitch and roll
+within the bounds $-30\mydegree$ to $30\mydegree$ with a thrust greater
+than or equal to 0, while holding yaw constant at 0.
+\[
+\smallangle \triangleq \left| \tlavar{\pitch} \right| \leq 30\mydegree \wedge \left|\tlavar{\roll}\right| \leq 30\mydegree \wedge 0 \leq \tlavar{T}
+\]
+Prior work has suggested that this is a reasonable approximation under this
+small-angle condition ($\smallangle$), since the attitude dynamics are
+significantly faster than the velocity and position
+dynamics~\cite{Gillula2011}.  We capture this condition by requiring that
+all quadcopter controllers are enabled under $\smallangle$.  That is, our
+goal is to build controllers $D$ such that
+\[
+\begin{array}{l}
+\SysPreservesP{I}{(\Sys{(D\wedge\Next{\smallangle})}{\W_{QC}}{\Delta})}~\wedge \\
+\SysNeverStuckP{I}{(\Sys{(D\wedge\Next{\smallangle}))}{\W_{QC}}{\Delta})}
+\end{array}
+\]
+
+For some state-constraints and their corresponding controllers, it is only
+necessary to reason about an abstraction of the quadcopter dynamics
+$\W_{QC}$.  For example, reasoning about a controller that enforces a bound
+on the vertical position \tlavar{z} might only require reasoning about the
+portion of the dynamics on which \tlavar{z} depends.  We formalize this
+with:
+\[\begin{array}{rl}
+ & \SysPreservesP{I}{(\Sys{(D\wedge\Next{\smallangle}))}{\W}{\Delta})}~\wedge \\
+ & \SysNeverStuckP{I}{(\Sys{(D\wedge\Next{\smallangle})}{\W}{\Delta})} \\
+ & (\W_{QC} \rightarrow \W)~\wedge \\
+\entails & \SysPreservesP{I}{(\Sys{(D\wedge\Next{\smallangle})}{\W_{QC}}{\Delta})}~\wedge \\
+ & \SysNeverStuckP{I}{(\Sys{(D\wedge\Next{\smallangle})}{\W_{QC}}{\Delta})}
+\end{array}
+\]
+where $\W_{QC} \rightarrow \W$ states that $\W$ is an abstraction of
+$\W_{QC}$.
