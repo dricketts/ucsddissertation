@@ -1,0 +1,77 @@
+There has been a tremendous amount of work on the specification and
+verification of hybrid systems, both from the verification community and
+the control theory community.  In this section, we describe some of the
+prior work in this area, highlighting the commonalities and difference with
+our own work.
+
+\section{Hybrid Automata}
+
+\section{Deductive logics}
+
+\subsection{Temporal Logic}
+The foundation for Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16} is
+temporal logic, and there has been a lot of work on composition in temporal
+logic, most notably by Abadi and
+Lamport~\cite{abadi1995conjoin,abadi1994realtime}.  Their work describes
+how to reason about the conjunction of LTL specifications, but they do not
+deal with the interplay between conjunction and \progress{} or substitution
+and \progress{}.  It is important to note that the preservation/\progress{}
+split is not the same as the safety/liveness split as both preservation and
+progress are safety properties.  Abadi and Lamport address Zeno
+specifications in~\cite{abadi1994realtime}, but do not address the
+relationship between Zenoness and conjunction.  Finally, neither of these
+works addresses substitution in the presence of progress.  It is also
+important to note that we use disjunction for non-deterministic choice
+between controllers while much of the work in temporal logic uses
+disjunction to represent interleaving specifications of asynchronous
+concurrent systems.  Other work includes techniques for decomposing LTL
+verification into a search for suitable barrier
+certificates~\cite{wongpiromsarntemporal15} and deductive rules for
+synthesizing controllers satisfying ATL* properties~\cite{dimitrovaATL14}.
+While these approaches apply to more temporal logic formulas than ours,
+they do not address verification using conjunction, disjunction, and
+substitution.  There has also been work on synthesis using approximate
+bisimulations~\cite{tabuada08approx}.  We focus on the complementary task
+of composing and reusing controllers.
+
+\section{Architectures for Cyber-physical Systems}
+In Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16}, we describe how to
+architect hybrid systems in order to ensure safety in the presence of
+complex, unverified controllers.  There has been prior work in this area,
+much of it based on the simplex architecture~\cite{sha1996evolving}.  In
+this architecture, there is a simple module that constantly monitors the
+system and takes control away from more complex modules before the system
+can enter an unsafe state.  We follow a similar principle with our
+controller architecture from those two chapters. Our work complements that
+based on~\cite{sha1996evolving} by formally verifying the simple monitoring
+module (our controllers) rather than relying on their simplicity for
+correctness.
+
+Livadas and Lynch solve a similar problem using hybrid I/O automata to
+model and reason about ``protectors'' for hybrid systems~\cite{LivadasL98}.
+A protector is designed to ensure a safety property of a particular hybrid
+system. Livadas and Lynch present a series of rules for conjunctive
+composition of protectors.  In contrast, our work also supports other forms
+of composition, \textit{e.g.} disjunctive composition, and we show how
+these operators can be \emph{combined} to achieve modular verification.
+
+Our theory from Chapter~\ref{chap:emsoft16} is closely related to the work
+on modular construction of nonblocking supervisory controllers in
+discrete-event systems~\cite{wonham1988supervisory-small}.  However, our
+models explicitly include differential equations rather than requiring a
+discrete abstraction and do not require a notion of termination in a marked
+state.  Moreover, to the best of our knowledge, none of this work makes the
+inductive invariant explicit and separates preservation from \progress{}.
+
+Finally, the area of switching control~\cite{liberzon2012switching} from
+control theory focuses on (in our terminology) disjunctive composition of
+controllers.  Our inclusion of invariants in the discrete controller
+corresponds to expressing the switching boundary in a switching controller.
+However, the focus of switching control theory is optimality, stability,
+and transitionability, whereas we focus on complementary properties like
+bounding the state space.
+%TODO read more about switching control
+
+\section{Inductive Methods for Hybrid Systems}
+
+\section{Sampled-data Systems}

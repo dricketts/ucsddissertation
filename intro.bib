@@ -1,0 +1,328 @@
+* Motivation
+** Compcert
+@article{leroy2009compcert,
+  author = {Xavier Leroy},
+  title = {Formal verification of a realistic compiler},
+  journal = {Communications of the ACM},
+  year = 2009,
+  volume = 52,
+  number = 7,
+  pages = {107--115},
+  url = {http://gallium.inria.fr/~xleroy/publi/compcert-CACM.pdf},
+  urlpublisher = {http://doi.acm.org/10.1145/1538788.1538814},
+  hal = {http://hal.archives-ouvertes.fr/inria-00415861/},
+  pubkind = {journal-int-mono},
+  abstract = {This paper reports on the development and formal verification (proof
+of semantic preservation) of CompCert, a compiler from Clight (a
+large subset of the C programming language) to PowerPC assembly code,
+using the Coq proof assistant both for programming the compiler and
+for proving its correctness.  Such a verified compiler is useful in
+the context of critical software and its formal verification: the
+verification of the compiler guarantees that the safety properties
+proved on the source code hold for the executable compiled code as
+well.}
+}
+
+* Hybrid System Failures
+@article{leveson1993investigation,
+  title={An investigation of the Therac-25 accidents},
+  author={Leveson, Nancy G and Turner, Clark S},
+  journal={Computer},
+  volume={26},
+  number={7},
+  pages={18--41},
+  year={1993},
+  publisher={IEEE}
+}
+
+@misc{lions1996ariane,
+  title={Ariane 5 flight 501 failure},
+  author={Lions, Jacques-Louis and others},
+  year={1996},
+  publisher={Report by the enquiry board. http://www. cs. berkeley. edu/\~{} demmel/ma221/ariane5rep. html}
+}
+
+@article{kane2010toyota,
+  title={Toyota sudden unintended acceleration},
+  author={Kane, Sean and Liberman, Ellen and DiViesti, Tony and Click, Felix},
+  journal={Safety Research \& Strategies},
+  year={2010}
+}
+
+@inproceedings{halperin2008pacemakers,
+  title={Pacemakers and implantable cardiac defibrillators: Software radio attacks and zero-power defenses},
+  author={Halperin, Daniel and Heydt-Benjamin, Thomas S and Ransford, Benjamin and Clark, Shane S and Defend, Benessa and Morgan, Will and Fu, Kevin and Kohno, Tadayoshi and Maisel, William H},
+  booktitle={Security and Privacy, 2008. SP 2008. IEEE Symposium on},
+  pages={129--142},
+  year={2008},
+  organization={IEEE}
+}
+
+@misc{patriotmissle,
+  title = {{Patriot Missile Software Problem}},
+  howpublished = {\url{http://sydney.edu.au/engineering/it/~alum/patriot_bug.html}},
+  note = {Accessed: 2015-04-30}
+}
+
+* Security
+@InProceedings{checkoway-et-al:avc-security:evt09,
+  author =       {Stephen Checkoway and Ariel J. Feldman and Brian
+                  Kantor and J. Alex Halderman and Edward W. Felten
+                  and Hovav Shacham},
+  title =        {Can {DREs} Provide Long-Lasting Security?  {The}
+                  Case of Return-Oriented Programming and the {AVC}
+                  {Advantage}},
+  booktitle =    {Proceedings of EVT/WOTE 2009},
+  year =         2009,
+  editor =       {David Jefferson and Joseph Lorenzo Hall and Tal
+                  Moran},
+  month =        aug,
+  organization = {USENIX/ACCURATE/IAVoSS}
+}
+
+@InProceedings{checkoway-et-al:car2:usec11,
+  author =       {Stephen Checkoway and Damon McCoy and Brian Kantor
+                  and Danny Anderson and Hovav Shacham and Stefan
+                  Savage and Karl Koscher and Alexei Czeskis and
+                  Franziska Roesner and Tadayoshi Kohno},
+  title =        {Comprehensive Experimental Analyses of Automotive
+                  Attack Surfaces},
+  booktitle =    {Proceedings of USENIX Security 2011},
+  year =         2011,
+  BLAHeditor =       {David Wagner},
+  month =        aug,
+  organization = {USENIX},
+  pages =        {77-92}
+
+}
+
+@InProceedings{koscher-et-al:car:oakland10,
+  author =       {Karl Koscher and Alexei Czeskis and Franziska
+                  Roesner and Shwetak Patel and Tadayoshi Kohno and
+                  Stephen Checkoway and Damon McCoy and Brian Kantor
+                  and Danny Anderson and Hovav Shacham and Stefan
+                  Savage},
+  title =        {Experimental Security Analysis of a Modern
+                  Automobile},
+  booktitle =    {Proceedings of IEEE Security and Privacy
+                  (``Oakland'') 2010},
+  year =         2010,
+  BLAHeditor =       {David Evans and Giovanni Vigna},
+  month =        may,
+  organization = {IEEE Computer Society},
+  pages =        {447-62}
+}
+
+@MISC{Collins10ataylor,
+    author = {Pieter Collins and Milad Niqui and Nathalie Revol},
+    title = {{A Taylor Function Calculus for Hybrid System Analysis: Validation in Coq (Extended Abstract)}},
+    year = {2010}
+}
+
+@inproceedings{GeuversKSW10,
+  author    = {Herman Geuvers and
+               Adam Koprowski and
+               Dan Synek and
+               Eelis van der Weegen},
+  title     = {Automated Machine-Checked Hybrid System Safety Proofs},
+  booktitle = {{ITP} '10},
+  pages     = {259--274},
+  year      = {2010},
+  url       = {http://dx.doi.org/10.1007/978-3-642-14052-5_19},
+  doi       = {10.1007/978-3-642-14052-5_19},
+  timestamp = {Tue, 10 Aug 2010 14:34:07 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/itp/GeuversKSW10},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@inproceedings{Niqui2008,
+ author = {Niqui, Milad and Tveretina, Olga},
+ title = {{Modular Development of Hybrid Systems for Verification in Coq}},
+ booktitle = {{HSCC} '08},
+ series = {HSCC '08},
+ year = {2008},
+ isbn = {978-3-540-78928-4},
+ location = {St. Louis, MO, USA},
+ pages = {638--641},
+ numpages = {4},
+ url = {http://dx.doi.org/10.1007/978-3-540-78929-1_53},
+ doi = {10.1007/978-3-540-78929-1_53},
+ acmid = {1423088},
+ publisher = {Springer-Verlag},
+ BLAHaddress = {Berlin, Heidelberg},
+}
+
+@article{tveretina2009towards,
+  title={{Towards the Safety Verification of Real-Time Systems with the Coq Proof Assistant}},
+  author={Tveretina, Olga},
+  journal={JAMRIS},
+  volume={3},
+  pages={30--32},
+  year={2009}
+}
+
+* Hybrid Systems in other Proof Assistants
+@INPROCEEDINGS{mumm-hybrid-pvs,
+author={Abraham-Mumm, E. and Hannemann, U. and Steffen, M.},
+booktitle={ECCS '01},
+title={{Verification of hybrid systems: formalization and proof rules in PVS}},
+year={2001},
+month={},
+pages={48-57},
+keywords={automata theory;program verification;synchronisation;theorem proving;PVS;continuous behavior;deductive methods;discrete state-machines;general-purpose theorem prover;hybrid automata;hybrid systems;hybrid systems verification;inductive proof method;infinite state systems;label-synchronization;model checking;proof rules;shared variable communication;state-based program verification;Application software;Automata;Automatic control;Communication system control;Computer industry;Councils;Embedded software;Embedded system;Software safety;Software systems},
+doi={10.1109/ICECCS.2001.930163},}
+
+@MISC{volker2000towards,
+    author = {Norbert Völker},
+    title = {{Towards a HOL Framework for the Deductive Analysis of Hybrid Control Systems}},
+    year = {2000}
+}
+
+* Control Theory
+@incollection{prajna2004safety,
+  title={Safety verification of hybrid systems using barrier certificates},
+  author={Prajna, Stephen and Jadbabaie, Ali},
+  booktitle={Hybrid Systems: Computation and Control},
+  pages={477--492},
+  year={2004},
+  publisher={Springer}
+}
+
+@book{bertsekas1999nonlinear,
+  title={Nonlinear programming},
+  author={Bertsekas, Dimitri P},
+  year={1999},
+  publisher={Athena scientific Belmont}
+}
+
+@article{asarin2000effective,
+  title={Effective synthesis of switching controllers for linear systems},
+  author={Asarin, Eugene and Bournez, Olivier and Dang, Thao and Maler, Oded and Pnueli, Amir},
+  journal={Proceedings of the IEEE},
+  volume={88},
+  number={7},
+  pages={1011--1025},
+  year={2000},
+  publisher={IEEE}
+}
+
+@book{liberzon2003switching,
+  title={Switching in systems and control},
+  author={Liberzon, Daniel},
+  year={2003},
+  publisher={Springer Science \& Business Media}
+}
+
+@inproceedings{hespanha2001tutorial,
+  title={Tutorial on supervisory control},
+  author={Hespanha, Joao P},
+  booktitle={Lecture Notes for the workshop Control using Logic and Switching for the 40th Conf. on Decision and Contr., Orlando, Florida},
+  year={2001}
+}
+
+@article{lin2009stability,
+  title={Stability and stabilizability of switched linear systems: a survey of recent results},
+  author={Lin, Hai and Antsaklis, Panos J},
+  journal={Automatic control, IEEE Transactions on},
+  volume={54},
+  number={2},
+  pages={308--322},
+  year={2009},
+  publisher={IEEE}
+}
+
+@book{zaccarian2011modern,
+  title={Modern anti-windup synthesis: control augmentation for actuator saturation},
+  author={Zaccarian, Luca and Teel, Andrew R},
+  year={2011},
+  publisher={Princeton University Press}
+}
+
+@article{tomlin2000game,
+  title={A game theoretic approach to controller design for hybrid systems},
+  author={Tomlin, Claire J and Lygeros, John and Sastry, S Shankar},
+  journal={Proceedings of the IEEE},
+  volume={88},
+  number={7},
+  pages={949--970},
+  year={2000},
+  publisher={IEEE}
+}
+
+@article{tomlin2001safety,
+  title={Safety verification of conflict resolution manoeuvres},
+  author={Tomlin, Claire and Mitchell, IM and Ghosh, Ronojoy},
+  journal={Intelligent Transportation Systems, IEEE Transactions on},
+  volume={2},
+  number={2},
+  pages={110--120},
+  year={2001},
+  publisher={IEEE}
+}
+
+@article{tomlin2003computational,
+  title={Computational techniques for the verification of hybrid systems},
+  author={Tomlin, Claire J and Mitchell, Ian and Bayen, Alexandre M and Oishi, Meeko},
+  journal={Proceedings of the IEEE},
+  volume={91},
+  number={7},
+  pages={986--1001},
+  year={2003},
+  publisher={IEEE}
+}
+
+@article{rosen1960gradient,
+  title={The gradient projection method for nonlinear programming. Part I. Linear constraints},
+  author={Rosen, Jo Bo},
+  journal={Journal of the Society for Industrial \& Applied Mathematics},
+  volume={8},
+  number={1},
+  pages={181--217},
+  year={1960},
+  publisher={SIAM}
+}
+
+@article{rosen1961gradient,
+  title={The gradient projection method for nonlinear programming. Part II. Nonlinear constraints},
+  author={Rosen, JB},
+  journal={Journal of the Society for Industrial \& Applied Mathematics},
+  volume={9},
+  number={4},
+  pages={514--532},
+  year={1961},
+  publisher={SIAM}
+}
+
+* DSLs
+@inproceedings{SMACCM,
+ author = {Hickey, Patrick C. and Pike, Lee and Elliott, Trevor and Bielman, James and Launchbury, John},
+ title = {{Building Embedded Systems with Embedded DSLs}},
+ booktitle = {ICFP'14},
+ year = {2014},
+ isbn = {978-1-4503-2873-9},
+ location = {Gothenburg, Sweden},
+ pages = {3--9},
+ numpages = {7},
+ url = {http://doi.acm.org/10.1145/2628136.2628146},
+ doi = {10.1145/2628136.2628146},
+ acmid = {2628146},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {embedded domain specific languages, embedded systems},
+}
+
+@book{appel2014vst,
+  title={{Program Logics for Certified Compilers}},
+  author={{Andrew W. Appel and Robert Dockins and Aquinas Hobor and Josiah Dodds and Xavier Leroy and Sandrine Blazy and Gordon Stewart and Lennart Beringer}},
+  month={April},
+  year={2014},
+  isbn={9781107048010}
+}
+
+#+STARTUP: showall
+
+#+BEGIN_COMMENT
+Local Variables:
+mode: org
+End:
+#+END_COMMENT
