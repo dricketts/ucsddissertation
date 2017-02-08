@@ -581,3 +581,739 @@ with:
 \]
 where $\W_{QC} \rightarrow \W$ states that $\W$ is an abstraction of
 $\W_{QC}$.
+
+\subsection{Reuse via Substitution}
+\label{sec:simulation}
+\label{sec:subst}
+Substitution of expressions for variables is a simple but powerful operator
+that allows us to reuse controllers and their properties.  For example,
+substitution allows us to perform familiar geometric transformations such
+as translations, reflections, scaling, and rotations.  In addition,
+substitution allows us to project simple dynamics onto more complex
+dynamics; a technique we use to build verified state-constraining
+controllers for the quadcopter.  We will explain the general technique by
+using it to transport (re-use) the second-derivative controller
+(\derivShimx), and its safety proof, to enforce a maximum altitude for our
+quadcopter.
+
+For a formula $P$ and substitution $\sigma$ (map from variables to
+expressions), the semantic definition of substitution is:
+\[\begin{array}{rcl}
+tr \models \Rename{\sigma}{P} & \triangleq & \Rename{\sigma}{tr} \models P
+\end{array}
+\]
+which states that a substituted formula ($\Rename{\sigma}{P}$) holds on a
+trace ($tr$) if the formula ($P$) holds on the renamed trace
+($\Rename{\sigma}{tr}$).  Under this definition, application of
+substitution always guarantees preservation:
+\begin{theorem}{\ProofRule{SubstPreserves}}
+\begin{prooftree}
+\AxiomC{$\entails \SysPreservesP{I}{S}$}
+\UnaryInfC{$\entails \SysPreservesP{\big(\Rename{\sigma}{I}\big)}{\big(\Rename{\sigma}{S}\big)}$}
+\end{prooftree}
+\end{theorem}
+This proof rule allows us to easily
+transport \ProofRule{$\partial^2$-Preserves} to the quadcopter.  For
+example, using it we can conclude
+\begin{align*}
+&\entails \SysPreservesP{\big(\Rename{\sigma_{\partial^2\rightarrow{}QC}}{\invShimx}\big)}{\big(\Rename{\sigma_{\partial^2\rightarrow{}QC}}{\derivShimx}\big)} \\
+\sigma_{\partial^2\rightarrow{}QC} &\defined \{\tlavar{a} \mapsto \tlavar{T} \cos \tlavar{\roll} \cos \tlavar{\pitch} - g ,\; \tlavar{y} \mapsto \tlavar{z} ,\; \tlavar{v} \mapsto \tlavar{v_z}\}
+\end{align*}
+Note that the first argument to $\SysPreserves{}$ is the inductive
+invariant for the new system, and can be read directly from the conclusion
+of the preservation theorem.  This is the case for all of our preservation
+theorems.
+
+Next, we need to justify the \progress{} of the substituted system.  The
+interaction between substitution and \progress{} is a bit subtle because
+substitutions can introduce coupling between values that were uncoupled
+before the substitution.  For example, $(\tlanextvar{x} =
+1 \wedge \tlanextvar{y} = 0)$ is \Enabled{} while
+$\Rename{\tlavar{x} \mapsto \tlavar{z}
+,\; \tlavar{y} \mapsto \tlavar{z}}{(\tlanextvar{x} =
+1 \wedge \tlanextvar{y} = 0)}$, which equals $\tlanextvar{z} =
+1 \wedge \tlanextvar{z} = 0$, is not.
+
+However, we can prove that \emph{invertible} substitutions preserve
+progress.  This is because the inverse of the substitution is a function
+for computing the \Enabledness witness for the substituted system from
+the \Enabledness witness for the original system.  Because of this, we can
+actually state a stronger \progress{} theorem for substitution, which
+captures the fact that the inverse substitution preserves known constraints
+on \Enabledness witnesses, such as $\Ca$ for the first and second
+derivative controllers.  As we will see, this is crucial for proving the
+small-angle constraint ($\smallangle$).  Formally,
+\begin{theorem}{\ProofRule{Subst\xmakefirstuc{\progress{}}}}
+For all formulas $S$, state formulas $Q$ and $R$, and substitutions
+$\sigma$, if there exists a $\sigma^{-1}$ such that
+$R\entails(\sigma \circ \sigma^{-1})\, \tlavar{x} = \tlavar{x}$ for all
+variables \tlavar{x} that occur primed in $S$, and if
+$R \entails \Rename{\sigma^{-1}}{Q}$ then
+\begin{prooftree}
+\AxiomC{$\entails \SysNeverStuckP{I}{(S\wedge\Next{R})}$}
+\UnaryInfC{$\entails \SysNeverStuckP{\big(\Rename{\sigma}{I}\big)}{\big(\Rename{\sigma}{S}\wedge\Next{Q}\big)}$}
+\end{prooftree}
+\end{theorem}
+
+When we apply this theorem to prove the \progress{} of the quadcopter
+altitude controller, the following inverse works:
+\[
+\sigma_{\partial^2\rightarrow{}QC}^{-1} \triangleq \tlavar{\roll} \mapsto 0, \tlavar{\pitch} \mapsto 0, \tlavar{T} \mapsto \tlavar{a} + g, \tlavar{z} \mapsto \tlavar{y}, \tlavar{v_z} \mapsto \tlavar{v}
+\]
+We instantiate $Q$ with $\smallangle$ and $R$ with $\Ca$ to guarantee
+\[
+\SysNeverStuckP{I}{\big(\Sys{(\Rename{\sigma_{\partial^2\rightarrow{}QC}}{D_{\derivShimx}}\wedge \Next{\smallangle})}{(\Rename{\sigma_{\partial^2\rightarrow{}QC}}{\W_{1D}})}{\Delta}\big)}
+\]
+
+Finally, as noted above, we need to prove that
+$\W_{QC} \rightarrow \Rename{\sigma_{\partial^2\rightarrow{}QC}}{\W_{1D}}$,
+i.e. the continuous dynamics produced by the substition is an abstraction
+of the full quadcopter dynamics.  This reasoning involves standard
+substition within differential equations, which we have formalized and
+proved sound in Coq, and mechanical arithmetic reasoning.
+
+\paragraph*{Enforcing Planar Boundaries}
+Using our two substitution theorems, we can map the first- and
+second-derivative controllers onto the quadcopter dynamics in many ways,
+allowing us to verify many properties with relatively little effort.  We
+showed how to use it to implement an upper bound on altitude.  In general,
+we can use substitution on the second derivative controller to enforce that
+the quadcopter stays on one side of any 2D plane in 3D space.  For example,
+we can enforce a maximum-west boundary to prevent the quadcopter from
+flying into a building.  Similarly, by applying substitution to the
+first-derivative controller we can place bounds on velocity in any
+direction.  The key is that our two substitution theorems allow us to
+transfer the correctness of any controller to work on a new dynamics that
+can be constructed from an invertible substitution.
+
+\subsection{Disjunctive Composition}
+\label{sec:disjunctive-composition}
+
+In this section we present rules to compose systems using disjunction.  For
+example, suppose that we wish to enforce a rectangular no-fly zone centered
+around the origin (depicted in Figure~\ref{fig:dont-hit-the-pilot}).  A
+system can avoid the no-fly zone if at all times it is to the north, the
+south, the east, \emph{or} to the west of the rectangle.  We can build such
+a system by disjoining subsystems $M_N$, $M_S$, $M_E$, and $M_W$, which are
+each built from a substitution applied to \derivShimx{} to enforce the
+northern, southern, eastern, and western boundaries of the box,
+respectively.  As we will see, separately exposing preservation
+and \progress{} allows us to define a disjunction operator that is fully
+compositional and that permits the system to transition from an inductive
+invariant of one subsystem to another (e.g. north of the no-fly zone to
+west of the no-fly zone) during a single trace; this would not be possible
+with global invariant proofs.
+
+The disjunctive composition of two systems is defined by the $\oplus$
+operator, which is indexed by the inductive invariants of the two systems.
+Formally,
+\begin{definition}{Disjunctive composition}
+\[\begin{array}{l}
+\SysDisjoin{\left(\Sys{D_1}{\W}{\Delta}\right)}{I_1}{\left(\Sys{D_2}{\W}{\Delta}\right)}{I_2} \triangleq \\
+\qquad \Sys{\big((I_1 \wedge D_1) \vee (I_2 \wedge D_2)\big)}{\W}{\Delta} %% \big((I_1 \wedge \W_1) \vee (I_2 \vee \W_2)\big)}{\Delta}
+\end{array}
+\]
+\end{definition}
+The inclusion of the \emph{inductive} invariants in this definition is
+essential to enforce the disjunction of the properties.  To see why,
+consider our example and suppose the system is currently along the western
+edge of the no-fly zone.  Since the system is outside of the inductive
+invariant of the eastern controller, the eastern controller could allow the
+system to do anything, including moving east into the no-fly zone.  Thus,
+at each discrete transition, the composed controller must consider the
+discrete transitions of a sub-controller whose inductive invariant
+currently holds.  This guarantees that the inductive invariant of that
+subsystem holds after the transition.  Moreover, it means that the system
+can transition from one inductive invariant to another, only where the
+inductive invariants overlap.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.5cm,y=0.5cm]
+
+\begin{scope}[yscale=0.75,xscale=0.75]
+
+% Axis
+\draw (-3,0) -- (3,0) ;
+\draw (0,-3) -- (0,3) ;
+
+
+\draw[dashed] (-1.75,-3) -- (-1.75,3) ;
+\fill[pattern=north west lines, pattern color=gray] (-1.75,-3) rectangle (-3,3) ;
+
+\begin{scope}[rotate=180]
+\draw[dashed] (-1.75,-3) -- (-1.75,3) ;
+\fill[pattern=north west lines, pattern color=gray] (-1.75,-3) rectangle (-3,3) ;
+\end{scope}
+
+\begin{scope}[rotate=90]
+\draw[dashed] (-1.5,-3) -- (-1.5,3) ;
+\fill[pattern=north east lines, pattern color=gray] (-1.5,-3) rectangle (-3,3) ;
+\end{scope}
+
+\begin{scope}[rotate=-90]
+\draw[dashed] (-1.5,-3) -- (-1.5,3) ;
+\fill[pattern=north east lines, pattern color=gray] (-1.5,-3) rectangle (-3,3) ;
+\end{scope}
+
+\node[anchor=west,fill=white,opacity=0.75,inner sep=0.15em] at (-2.7,2.5) {\small Safe Region} ;
+\node[anchor=west,inner sep=0.15em] at (-2.7,2.5) {\small Safe Region} ;
+
+\node[anchor=west,fill=white,opacity=0.75,inner sep=0em,text width=1.25cm,align=center] at (-1.75,0.5) {\small Restricted Zone} ;
+\node[anchor=west,inner sep=0em,text width=1.25cm,align=center] at (-1.75,0.5) {\small Restricted Zone} ;
+
+\draw[latex-] (2,2) to[bend left] (3.5,2) node[inner sep=0.15em,anchor=north west,text width=3.5cm] {\footnotesize Intersection of inductive invariants} ;
+
+\draw[latex-] (-2,0.1) to[bend right] (-3.5,0.4) node[inner sep=0.15em,anchor=east] {\footnotesize $M_W$} ;
+\draw[latex-] (-1,1.75) to[bend left] (-3.5,2.1) node[inner sep=0.15em,anchor=south east] {\footnotesize $M_N$} ;
+\draw[latex-] (-1,-1.75) to[bend left] (-3.5,-2.1) node[inner sep=0.15em,anchor=south east] {\footnotesize $M_S$} ;
+
+\draw[latex-] (2,-0.5) to[bend right] (3.5,-1.2) node[inner sep=0.15em,anchor=west] {\footnotesize $M_E$} ;
+
+\end{scope}
+\end{tikzpicture}
+
+
+\caption{Staying out of restricted airspace using the disjunction of four controllers.}
+\label{fig:dont-hit-the-pilot}
+\end{figure}
+
+This definition of disjunction is fully compositional with
+both \SysPreserves and \SysNeverStuck.  In particular, the disjunctive
+composition of two systems that independently preserve $I_A$ and $I_B$
+preserves $I_A \vee I_B$:
+\begin{theorem}{\ProofRule{DisjoinPreserves}}
+\[\begin{array}{rl}
+       & \SysPreservesP{I_A}{A} \;\wedge\; \SysPreservesP{I_B}{B} \\
+\entails & \SysPreservesP{\big(I_A \vee I_B\big)}{\big(\SysDisjoin{A}{I_A}{B}{I_B}\big)}
+\end{array}
+\]
+\end{theorem}
+\noindent
+Using only this theorem we can easily construct a proof that the
+disjunctive composition of our four controllers enforces the no-fly zone
+property.
+
+A similar theorem states that \disjoinop guarantees \SysNeverStuck.
+\begin{theorem}{\ProofRule{Disjoin\xmakefirstuc{\progress{}}}}
+\[\begin{array}{rl}
+       & \SysNeverStuckP{I_A}{A} \;\wedge\; \SysNeverStuckP{I_B}{B} \\
+\entails & \SysNeverStuckP{(I_A \vee I_B)}{\big(\SysDisjoin{A}{I_A}{B}{I_B}\big)}
+\end{array}
+\]
+\label{thm:progress-disjoint}
+\end{theorem}
+\noindent
+The proof follows from the fact that $I_A$ ensures the \Enabledness of $A$
+and $I_B$ ensures the \Enabledness of $B$.  Since the new inductive
+invariant $\left( I_A \vee I_B\right)$ ensures that at least one of $I_A$
+or $I_B$ holds, at least one of $A$ or $B$ must be \Enabled.
+
+Disjunction is a very powerful composition mechanism that is applicable in
+a wide variety of circumstances.  For example, we can use it to guarantee
+that a train can only have a high velocity when it is not in a curve by
+composing a maximum velocity controller with a controller that stops the
+train before curves.  A controller such as this one could have prevented
+the Amtrak derailment in Philadelphia in 2015 that killed 8 people and
+injured 200.
+
+\subsection{Conjunctive Composition}
+\label{sec:conjunctive-composition}
+
+In this section, we present rules to compose systems to ensure the
+conjunction of their properties.  For example, one might want to ensure
+that a system's upward velocity does not exceed 1 m/s \emph{and} that the
+system stays below 100m by conjoining the first and second derivative
+controllers.  Unlike disjunctive composition, conjunctive composition of
+two systems satisfying \progress{} does not guarantee a system
+satisfying \progress{}, due to coupling.  However, our ability to
+separately prove \progress{} allows us to push forward.  We show that, even
+in coupled domains, conjunctive composition can lead to substantial savings
+in proof effort, and demonstrate some clever tricks that allow us to
+decouple domains that, on the surface, seem intricately linked.
+
+The conjunction of two systems is defined as follows:
+\begin{definition}{Conjunctive composition}
+\[
+\SysConjoinP{\Sys{D_1}{\W_1}{\Delta}}{\Sys{D_2}{\W_2}{\Delta}} \defined \Sys{\left(D_1 \wedge D_2\right)}{\left(\W_1 \wedge W_2\right)}{\Delta}
+\]
+\end{definition}
+The crucial feature of this definition is how it interacts
+with \SysPreserves.  Note that while disjunctive composition requires that
+both systems have the same continuous transition, conjunctive composition
+does not impose this restriction.
+\begin{theorem}{\ProofRule{ConjoinPreserves}}
+\[\begin{array}{rl}
+       & \SysPreservesP{I_A}{A} \;\wedge\; \SysPreservesP{I_B}{B} \\
+\entails & \SysPreservesP{\big(I_A \wedge I_B\big)}{\big(\SysConjoinP{A}{B}\big)}
+\end{array}
+\]
+\end{theorem}
+Intuitively, if we start in a state satisfying both $I_A$ and $I_B$, $A$
+guarantees that we stay in $I_A$, and $B$ guarantees that we remain in
+$I_B$, then if both $A$ and $B$ hold, we must remain in the intersection of
+$I_A$ and $I_B$.
+
+The difficulty of conjunctive composition lies in justifying \progress{}.
+Even though $A$ and $B$ may independently be \Enabled under the inductive
+invariant, there is no guarantee that their conjunction is \Enabled.  For
+example, suppose that we wish to compose an overly-conservative upper-bound
+controller that insists on a negative acceleration and a similarly
+conservative lower-bound controller that insists on a positive
+acceleration.  Since acceleration can not be simultaneously positive and
+negative, the conjunction of these controllers does not
+satisfy \progress{}.
+
+Nevertheless, all is not lost when conjoining two systems.  There are a
+variety of techniques for proving \Enabledness of conjunctions.  We will
+illustrate these techniques through a sequence of examples, ultimately
+culminating in a 3D bounding box for both position and velocity.
+
+\paragraph*{Example: Staying within an Interval}
+Consider constructing a controller that enforces both an upper and a lower
+bound on both position ($y$) and velocity ($v$) in a single spatial
+dimension.  We can build such a controller (which we call \intervalShim)
+using $\SysConjoin$ and an application of our substitution operator to the
+second- and first-derivative controllers:
+\begin{align*}
+\intervalShim &\defined \SysConjoinP{\derivShimx}{\Rename{\mirrorx}{\derivShimx}} \SysConjoin \derivShimv \SysConjoin \Rename{\mirrorx}{\derivShimv} \\
+\mirrorx &\defined \{ \tlavar{y} \mapsto -\tlavar{y} ,\; \tlavar{v} \mapsto -\tlavar{v} ,\; \tlavar{a} \mapsto -\tlavar{a} \}
+\end{align*}
+Here, the $\mirrorx$ substitution mirrors the controller's logic so that
+rather than enforcing an upper bound on $\tlavar{y}$ of $\ubY$ (resp. $v_y$
+of $v_{\mathsf{ub}}$), the substituted controller enforces a lower bound on
+$\tlavar{y}$ of $-\ubY$ (resp. $v_y$ of $-v_{\mathsf{ub}}$).
+
+The preservation of this composition follows immediately
+from \ProofRule{ConjoinPreserves}, \ProofRule{$\partial^2$-Preserves}, \ProofRule{$\partial$-Preserves},
+and \ProofRule{SubstPreserves}.  However, since conjoined systems are not
+guaranteed to satisfy \progress{}, we must prove this separately.
+Formally, we must prove \progress{} of $\intervalShim$ under the
+conjunction of the inductive invariants of the subsystems:
+\footnote{For brevity, $\invShimx$ and $\invShimv$ refer to the inductive invariants of \derivShimx{} and \derivShimv{}.}
+\[
+\SysNeverStuckP{\big(\invShimx\wedge\Rename{\mirrorx}{\invShimx}\wedge\invShimv\wedge\Rename{\mirrorx}{\invShimv}\big)}{\intervalShim}
+\]
+
+Informally, this states that, under the inductive invariant, there exists
+an action that is acceptable to all of the (non-deterministic) controllers.
+More formally, we must justify that there does not exist any state
+satisfying the inductive invariant for which there is not an action that
+all controllers accept.  Unfolding the definitions and applying the
+substitution ($\mirrorx$) reveals that the \progress{} of $\intervalShim$
+reduces to first-order reasoning over real arithmetic.  At first glance, it
+may seem as though modularity was a failure here; however, by separating
+preservation and \progress{}, the non-modularity of \progress{} did not
+prevent us from modularly proving preservation.  Moreover, our split
+crucially allows us to assume the inductive invariant when
+proving \progress{}.
+
+This is in contrast to other work~\cite{alur1997modularity} where
+conjunctive (parallel) composition is only allowed when the individual
+modules output to disjoint sets of variables.  Furthermore, we found the
+proof of $\SysNeverStuckP{I_{\intervalShim}}{\intervalShim}$ to
+be \emph{less than one third} the size of the proof of preservation of the
+individual second-derivative controller \derivShimx.  This means that
+$\SysConjoin$ greatly reduces the cost of conjoining systems, even when
+these systems are tightly coupled.
+
+It is important to note that under-specification of controllers is
+essential to composition in this case.  If both systems were completely
+specified then the two systems would be forced to make identical choices in
+order for them to compose.  By composing under-specified controllers, we
+retain the flexibility to find a solution that reconciles the restrictions
+of both controllers.
+
+In certain cases, our proof rules can be used to verify \progress{}
+compositionally.  To demonstrate this, we turn to the task of using our
+interval controller to modularly build a bounding rectangular prism.  We
+approach the problem in three steps.  First, we compose two interval
+controllers to enforce a bounding box in two spatial dimensions.  In the
+next section, we adapt this controller to the quadcopter by incorporating
+the small-angle constraint.  Finally, we apply the same technique to extend
+the 2D box into a 3D prism.
+
+\paragraph*{Example: Conjunction of Independent Systems}
+We construct the box by conjoining two instances of $\intervalShim$, using
+substitution to map them to the $x$- and $z$-dimensions respectively.
+\[\begin{array}{rcl}
+\mathsf{Box} & \defined & \Rename{\sigma_x}{\intervalShim} \SysConjoin \Rename{\sigma_z}{\intervalShim} \\
+\sigma_x &\defined &\{ \tlavar{y} \mapsto \tlavar{x} ,\; \tlavar{v} \mapsto \tlavar{v_x} ,\; \tlavar{a} \mapsto \tlavar{a_x} \} \\
+\sigma_z &\defined & \{ \tlavar{y} \mapsto \tlavar{z} ,\; \tlavar{v} \mapsto \tlavar{v_z} ,\; \tlavar{a} \mapsto \tlavar{a_z} - g \}
+\end{array}
+\]
+Verifying that $\mathsf{Box}$ enforces a bounding box is simply a matter of
+using \ProofRule{ConjoinPreserves}, \ProofRule{SubstPreserves}, and the
+preservation proof of $\intervalShim$.
+
+As others have noted~\cite{alur1997modularity}, \progress{} of conjoined
+systems is compositional, if the two systems output to disjoint sets of
+variables.  In our logic, the output variables of a formula are the
+next-state (primed) variables, whose disjointness is expressed by $A \perp'
+B$.  Formally,
+\begin{theorem}{\ProofRule{Conjoin\xmakefirstuc{\progress{}}Disjoint}}
+For all systems $A$ and $B$ such that $A \perp' B$, and for all state formulas $I_A$ and $I_B$,
+\[\begin{array}{rl}
+       & \SysNeverStuckP{I_A}{A} \;\wedge\; \SysNeverStuckP{I_B}{B} \\
+\entails & \SysNeverStuckP{\big(I_A \wedge I_B\big)}{\big(\SysConjoinP{A}{B}\big)}
+\end{array}
+\]
+\end{theorem}
+While we can not express disjointness of primed variables ($A \perp' B$)
+formally within our temporal logic, we can capture it in Coq's logic.
+Further, in practice the disjointness of two formulas is easily decidable
+in many cases meaning that discharging this side condition is often
+trivial.  From this theorem and variable disjointness, $\mathsf{Box}$
+satisfies \progress{} for the dynamics with independent \tlavar{a_x}
+and \tlavar{a_y}.
+
+Now suppose that instead of rectangular dynamics with independent control
+inputs \tlavar{a_x} and \tlavar{a_y}, we want a controller for polar
+coordinates with independent control inputs \tlavar{a} and \tlavar{\pitch}.
+For example, these are the dynamics of a 2D version of the quadcopter (with
+$\tlavar{\roll}$ fixed at 0), in the absence of the small-angle constraint.
+While the transformation to polar coordinates seems to couple the $x$ and
+$z$ instantiations of $\intervalShim$, there is always an invertible map
+from rectangular to polar coordinates.  This connection between polar and
+rectangular coordinates allows us to use the substitution theorems from
+Section~\ref{sec:subst} to prove both preservation and \progress{} for a
+version of $\mathsf{Box}$ that operates using polar thrust.
+
+Note that to arrive at this result, we first used disjoint composition to
+justify the syntactically independent system satisfies \progress{}.  We
+then applied our substitution theorems and the invertibility of the
+rectangular-to-polar transformation to show that the resulting system was
+the same as the quadcopter dynamics modulo the small-angle constraint. The
+takeaway is that although the system
+($\Rename{\sigma_{\pitch}}{\mathsf{Box}}$) is not superficially composed of
+disjoint subsystems, we can still verify both \progress{} and preservation
+fully modularly.
+
+\paragraph*{Example: Incorporating the Small-angle Constraint}
+The previous example ignored the small-angle constraint, which is critical
+to the accuracy of our model of the quadcopter's dynamics.  In this section
+we address this shortcoming and complete the verification of $\mathsf{Box}$
+with respect to a 2D version of $\W_{QC}$ (again, with $\tlavar{\roll}$
+fixed at 0) \emph{in a fully modular way}.  Figure~\ref{fig:small-angle}
+shows how the small-angle constraint introduces coupling into the
+independent box.  In particular, the hatched region corresponds to the
+accelerations achievable under the small-angle constraint while the
+unconstrained region corresponds to the accelerations necessary for
+$\mathsf{Box}$ developed in the previous section.
+
+\newcommand{\Tminx}{\ensuremath{\Tmin^{x}}\xspace}
+\newcommand{\Tminz}{\ensuremath{\Tmin^{z}}\xspace}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[x=0.48cm,y=0.48cm]
+
+\draw[latex-latex] (0,-2) -- (0,2) node[above] {$z$};
+\draw[latex-latex] (-2,0) -- (2,0) node[anchor=west] {$x$};
+
+\draw[-latex] (0,-1.5) -- (45:3) ;
+\draw[-latex] (0,-1.5) -- (135:3) ;
+\fill[pattern color=gray!50,pattern=north west lines] (0,-1.5) -- (45:3) -- ++(-4.25,0) -- cycle ;
+
+\draw[densely dotted,thick] (-1.5,-1.5) rectangle (1.5,1.5) ;
+
+\draw[dashed] (-0.6,-0.5) rectangle (0.6,0.5) ;
+
+\begin{scope}[xscale=-1]
+
+\draw[latex-,gray] (1.7,1.75) to[bend left] (3,1) node[anchor=north east,inner sep=0.2,black] {\footnotesize small-angle achievable} ;
+\draw[latex-,gray] (1,-1) to[bend left] (3,-1) node[anchor=north east, inner sep=0.2,black] {\footnotesize unconstrained \Tminx, \Tminz} ;
+\draw[latex-,gray] (-0.2,0.2) to[bend right] (-3,1.0) node[anchor=west,inner sep=0.2,black,text width=1.8cm] {\footnotesize independently achievable} ;
+
+\end{scope}
+\end{tikzpicture}
+
+\caption{Decoupling of \tlavar{a_x} and \tlavar{a_z}.}
+%%\caption{\tlavar{a_x} and \tlavar{a_z} can be decoupled under the small-angle constraint under assumptions on their ranges.}
+\label{fig:small-angle}
+\end{figure}
+
+Our approach relies on a detail of the verification which we glossed over
+in the previous presentation.  In particular, because the second-derivative
+controller is \emph{parameterized by \Tmin}, $\mathsf{Int}$ is
+parameterized by an \Tmin and $\mathsf{Box}$ is parameterized by a pair
+of \Tmin's in the $x$ and $z$ dimensions.  The right side of
+Figure~\ref{fig:small-angle} shows how we leverage the parameterization of
+$\mathsf{Box}$ to logically decouple the two dependent dimensions.  Our
+insight is the following.  If we can pick values for \Tminx and \Tminz
+(note that \Tminx and \Tminz are negative) such that all accelerations
+$a_x$ and $a_z$ where $|a_x| \leq -\Tminx$ and $|a_z| \leq -\Tminz$ are
+achievable by \tlavar{T} and \tlavar{\pitch} under the small-angle
+constraint then the values of \tlavar{a_x} and \tlavar{a_z} can be chosen
+independently \emph{if they fall within the bounds}.  Purely trigonometric
+reasoning reveals that the constraint on \tlavar{\pitch} is achieved for
+any values of \tlavar{a_x} and \tlavar{a_z} satisfying
+$\xConstraint \wedge \zConstraint$ defined as:
+\begin{align*}
+\xConstraint &\defined -(\Tmin + g) \tan 30\mydegree \leq \tlavar{a_x} \leq  (\Tmin + g) \tan 30\mydegree \\
+\zConstraint &\defined \Tmin \leq  \tlavar{a_z}  \leq   -\Tmin
+\end{align*}
+
+We can formalize this reasoning by noting that the previous example
+($\mathsf{Box}$), instantiated with the above choices of $\Tminx$ and
+$\Tminz$, satisfies \progress{} under the constraint
+$\xConstraint \wedge \zConstraint$.  Thus, we can use the substitution
+proof rule \ProofRule{Subst\xmakefirstuc{\progress{}}} with a
+rectangular-to-polar substitution, instantiating $R$ with
+$(\xConstraint\wedge\zConstraint)$ and $Q$ with the small-angle condition
+(ignoring $\tlavar{\roll}$ since it is assumed to be 0 in this 2D example).
+
+The important point of this verification is that the separation of
+preservation and \progress{} allowed for a relatively small and modular
+proof of a complex property of a \emph{highly coupled system}.  Without the
+separation of preservation and \progress{}, the coupling would have forced
+us to re-prove many of the intermediate properties.
+
+\paragraph{Example: Adding the Third Dimension}
+We can build a controller enforcing a cube by conjoining $\mathsf{Box}$
+with another instance of $\intervalShim$ substituted to reflect the $y$
+dimension.  We can then apply this cube to the 3D version of $\W_{QC}$
+(including $\tlavar{\roll}$ and the coupling small-angle constraint).
+Again, the modularity of our proofs shields us from much of the complexity.
+$\mathsf{Box}$ enforced the constraints for \tlavar{x} and \tlavar{z}
+using \tlavar{a_x} and \tlavar{a_z}.  Extending this to handle the third
+dimension simply requires that we use substitution to view \tlavar{a_x}
+and \tlavar{a_z} as a single unit and carry out the same reasoning,
+independently controlling that composed unit and \tlavar{a_y}.
+
+\section{Evaluation}
+\label{sec:eval}
+We evaluate our approach with four criteria: (1) proof effort, (2)
+expressiveness, (3) flight behavior, and (4) comparison to fully automated
+tools.
+
+\subsection{Proof Effort}
+Figure~\ref{fig:monitors} lists all of the geo-fencing controllers that we
+verified and flew, along with the composition mechanism, proof size, and
+number of symbols in the discrete transition for each one.  The first 2
+rows list controllers that we ported from prior work; these are our atomic
+building blocks.  The next 3 rows list controllers that we built and
+verified using a combination of substitution and conjunction.  The
+remaining rows list controllers that we built using disjunction and
+substitution.
+
+\begin{figure}
+\begin{tabular}{l|l|r|r}
+id: Name & Built How? & \# of Symbols & Lines of Proof \\
+\hline 
+a: 1D velocity bound & From Scratch & 43 & 130 \\
+b: 1D position bound & From Scratch & 126 & 484 \\
+c: 1D interval & $\SysConjoinP{\SysConjoinP{\Rename{}{b}}{\Rename{}{b}}}{\SysConjoinP{\Rename{}{a}}{\Rename{}{a}}}$ & 323 & 194 \\
+d: 2D square & $\Rename{}{(\SysConjoinP{\Rename{}{c}}{\Rename{}{c}})}$ & 805 & 258 \\
+e: 3D cube & $\Rename{}{(\SysConjoinP{d}{\Rename{}{c}})}$ & 1353 & 201 \\
+f: 3D square donut & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}$ & 5412 & 23 \\
+g: 3D +, T, $\bot$ & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}$ & 5412 & 23 \\
+h: 3D pilot box & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}$ & 5412 & 23 \\
+\end{tabular}
+\caption{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
+\label{fig:monitors}
+\end{figure}
+
+Note that our 1D position controller ($b$ in Figure~\ref{fig:monitors})
+involves 3 variables and 126 symbols and is a relatively simple discrete
+transition requiring only multiplication and addition.  However, verifying
+this position controller required substantial, tedious, manual proof effort
+because of the difficulty of reasoning about nonlinear real arithmetic.  On
+the other hand, our 3D cube controller ($e$ in Figure~\ref{fig:monitors})
+contains 9 variables, 1353 symbols, trigonometric functions, and angular
+constraints.  This increase in complexity is actually quite daunting for
+two reasons: (1) arithmetic decision procedures have very bad worst case
+complexity, and (2) trigonometric functions make the problem
+undecidable~\cite{HarrisonLogic09}.  Despite the substantial increase in
+complexity, our modular verification approach allowed us to verify the 3D
+version with only a modest amount of additional manual proof effort.
+
+Moreover, note that all controllers built using disjunction require
+negligible proof effort on top of the effort required to verify the
+individual components.  This is because disjunction composes proofs of both
+preservation and \progress{}. As we discuss in the next subsection, this is
+a very powerful tool.
+
+Finally, it is worth noting that we have several admits in our Coq
+development: (1) basic arithmetic theorems, (2) some theorems bridging the
+gap between $\W_{QC}$ and its abstractions, (3) theorems
+stating \progress{} of the continuous transitions in the quadcopter model.
+Crucially, these admits do not interfere with the core ideas that we are
+exploring, namely modular reasoning about sampled-data systems.
+
+\subsection{Expressiveness}
+Disjunction is extremely powerful when building real-world controllers.
+For example, we can build up pixelated versions of arbitrary shapes by
+composing instances of our cube controller.  Interesting properties that we
+can build with this include: (1) avoid no-fly zones such as airports, the
+white house, etc, (2) do not fly within a box surrounding the pilot, (3)
+stay away from static barriers such as trees and buildings, and (4) avoid
+skyscrapers in a city. In fact, our disjunction rules can be used to
+compose \emph{any} controller with any other controller, not just a cube.
+For example, if we were able to verify a controller enforcing a triangular
+prism or a sphere, we could compose instantiations of these controllers
+with our existing cube, with each other, or with any other controller.
+Again, all of this requires negligable additional proof burden.
+
+Conjunctive composition is similarly expressive -- the box and the cube
+both make heavy use of conjunctive composition.  The proof burden when
+using conjunction comes from justifying \progress{} (progress) of the
+resulting systems, which is not as compositional, especially in highly
+coupled domains.  Nevertheless, Our separation of \progress{} (progress)
+and preservation makes it possible to build compositional proofs of
+presevation even in highly coupled domains such as the box and cube.
+Finally, substitution allows us to reuse all controllers by translating and
+rotating them, and by transforming them into controllers for different
+physical dynamics.
+
+\subsection{Behavior in Actual Flight}
+\label{sec:flight}
+To make sure that our controllers work well in practice, we manually
+translated our models to C and ran them on a 3DR Iris+ quadcopter.  This
+allows us to evaluate the accuracy of our approximations.
+Figure~\ref{fig:arch} depicts the architecture of the system with one of
+our controllers inserted.  Our controllers check the outputs of the
+pre-existing control software, potentially replacing them with default safe
+values; this resolves the non-determinism of the controller specifications.
+This architecture means that the behavior of much of the existing control
+software (left of ``Verified Control'') cannot cause a violation of the
+fence.  Moreover, if the quadcopter remains sufficiently far from the fence
+boundaries, the system behaves exactly as it would without our controllers,
+so any performance properties of the existing control software are
+preserved.
+
+\begin{figure}[t]
+  \centering
+  \begin{tikzpicture}
+    \tikzstyle{every node}=[draw=black,thick,font=\bfseries,node distance=0.35cm]
+    \tikzstyle{every path}=[draw=black,thick]
+    \tikzstyle{wnode}=[minimum height=1cm]
+
+    \node[fill=black,text=white,text width=2cm,align=center,minimum height=1cm] (mon) at (0,0) {Verified Control} ;
+    \node[wnode,left=of mon,text width=2cm,align=center] (existing)  {Existing Control Software} ;
+
+    \node[draw=black,left=of existing,minimum height=0.5cm,yshift=0.3cm] (user) {User} ;
+    \node[draw=black,left=of existing,minimum height=0.6cm,yshift=-0.8cm] (sensor) {Sensors} ;
+
+    \node[wnode,right=of mon,text width=2cm,align=center] (control)  {Attitude Control} ;
+    \node[wnode,right=of control] (motor)  {Motors} ;
+
+    \newcommand{\quadline}[2]{%
+    \foreach \i in {-2,...,1}{%
+      \draw[-latex] ([yshift=0.12cm + \i * 0.24 cm]#1.east) -- ([yshift=0.12cm + \i * 0.24 cm]#2.west) ;}}
+
+    \quadline{mon}{control}
+    \quadline{control}{motor}
+    \quadline{existing}{mon}
+    \draw[-latex] let \p1 = (user.east),
+                      \p2 = (existing.west) in
+                  (user.east) -- (\x2,\y1) ;
+    \draw[-latex] let \p1 = (sensor.east),
+                      \p2 = (existing.west) in
+                  ([yshift=0.2cm]sensor.east) -- (\x2,\y1+0.2cm) ;
+    \draw[-latex] ([yshift=-0.2cm]sensor.east) -| (mon.south) ;
+
+
+
+  \end{tikzpicture}
+
+     \caption{System architecture.}
+     \label{fig:arch}
+\end{figure}
+
+We flew our quadcopter with all controllers listed in
+Figure~\ref{fig:monitors}.  All of the controllers enforced their
+respective bounds with only minor violations, which can be attributed to
+un-modeled forces such as wind and to modeling approximations.
+
+Perhaps the largest gap between our temporal logic model and the real world
+comes from our assumption that the controllers can instantaneously set the
+orientation, or attitude, of the quadcopter
+(Section~\ref{sec:quadcopter-dynamics}).  This is not possible in reality.
+Instead, an attitude controller controls attitude indirectly by sending
+voltage signals to the quadcopter's motors.  Thus, our controllers output
+desired attitude values (i.e. roll and pitch) to an attitude controller,
+and assume that these values are achieved instantaneously.  Prior work has
+suggested that this is a reasonable approximation, under the small angle
+assumption, since the attitude dynamics are significantly faster than the
+velocity and position dynamics~\cite{Gillula2011}.  Nevertheless, one of
+the reasons for running our controllers on a real quadcopter is to
+experimentally evaluate whether the attitude assumption works well in our
+context.
+
+Manually translating our models to C introduces a potential source of
+errors.  The two main aspects of this translation are: (1) approximating
+infinite precision real numbers in the logic using floating point numbers,
+and (2) validating the assumptions about the runtime of code using
+worst-case execution time analysis on the resulting code.  Both of these
+problems have been explored in a variety of
+contexts~\cite{darulova2014sound,maroneze2014certified,wilhelm2008worst},
+and are orthogonal to modularity.
+
+Our experiences flying the controllers from this chapter suggest several
+interesting avenues for future study.  First, our controllers can cause the
+quadcopter to oscillate near the boundaries.  If the pilot commands maximum
+acceleration towards a boundary, then our controllers, rather than
+converging smoothly to zero acceleration at the boundary, ultimately
+oscillate quickly between the pilots desired acceleration and the
+controller's breaking acceleration.  This is due to a large discontinuity
+in control input (desired attitude) near the boundaries. We address this
+shortcoming in Chapter~\ref{chap:exp-smpl}.
+
+Second, an early C implementation of our multi-cube controller (formed from
+a disjunction of cubes), was overly conservative due to the logic it used
+for responding to violations of both controllers.  In particular, it
+sometimes prevented the quadcopter from leaving a particular cube, even
+though the desired quadcopter path was safe for another cube.  The solution
+was to break ties in favor of the least invasive choice, which is a
+heuristic not expressed in the model. This experience suggests the some
+sort of liveness property is an interesting avenue for future work in this
+domain.
+ 
+Finally, our results suggest that minor violations of even formally
+verified properties are inevitable since no useful model of the physical
+world can capture everything.  Most of the time our controllers work well
+outside the boundaries, but our experiments do show that occasionally they
+cause the quadcopter to temporarily get stuck outside the boundaries. This
+means that it would be valuable to prove stronger versions of our state
+invariants expressing a form of robustness. Here, we can build on
+robustness notions from control theory called input-to-state
+stability~\cite{ISSsontag2008} and input-to-state dynamical
+stability~\cite{gruneISDS02}.  These definitions state that the behavior of
+a system \emph{degrades gracefully} as disturbances grow and that the
+effect of individual disturbances decreases as time passes.  For example, a
+quadcopter running our controllers may violate the boundary by a small
+amount if there is a small amount of wind and by a large amount if there is
+a strong wind, but in the absence of wind the vehicle must re-enter the
+boundary.
+
+\subsection{Comparison with fully automated tools}
+There are a number of state-of-the-art tools that attempt to automatically
+verify hybrid
+systems~\cite{PHAVerSTTT08,chen2015flow,kong2015dreach,HyTechCAV97}, but
+due to the complexity of the domain, they are limited to certain classes of
+systems and properties.
+
+PHAVer~\cite{PHAVerSTTT08}, which we ran through the SpaceEx tool
+platform~\cite{frehse2011spaceex-small}, is able to verify only one of our
+systems, namely the combined upper and lower bound on velocity.  However,
+PHAVer is not able to verify the upper bound on velocity in isolation,
+probably because there are fewer constraints on acceleration to limit the
+search space, compared to the controller that bounds velocity from above
+and below.  Finally, PHAVer is not able to run any of our other systems
+because the discrete transitions involve non-linear arithmetic; analyzing
+these systems would require manual construction of a linear
+overapproximation of the discrete transitions.
+
+dReach~\cite{kong2015dreach} and Flow*~\cite{chen2015flow}
+are \emph{bounded} model checkers, which means that they can conclude
+safety of a system within a user-specified time bound.  Our Coq proofs, on
+the other hand, guarantee safety for infinite runs.  It is possible to use
+dReach and Flow* to guarantee safety for all runs by manually providing the
+inductive invariant.  In this way, our results are complementary, as they
+provide a decomposition technique to manage scalability issues of these
+tools.  However, these tools are currently unable to handle universally
+quantified variables with unbounded domains.  This prevents them from
+verifying safety of systems with symbolic parameters, such as $\amin$ --
+they require concrete numerical bounds on these parameters, which weakens
+the safety theorem.
