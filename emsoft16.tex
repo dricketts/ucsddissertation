@@ -832,7 +832,8 @@ in coupled domains, conjunctive composition can lead to substantial savings
 in proof effort, and demonstrate some clever tricks that allow us to
 decouple domains that, on the surface, seem intricately linked.
 
-The conjunction of two systems is defined as follows:
+As in Chapter~\ref{chap:memo15}, the conjunction of two systems is defined
+as follows:
 \begin{definition}{Conjunctive composition}
 \[
 \SysConjoinP{\Sys{D_1}{\W_1}{\Delta}}{\Sys{D_2}{\W_2}{\Delta}} \defined \Sys{\left(D_1 \wedge D_2\right)}{\left(\W_1 \wedge W_2\right)}{\Delta}
@@ -844,15 +845,19 @@ both systems have the same continuous transition, conjunctive composition
 does not impose this restriction.
 \begin{theorem}{\ProofRule{ConjoinPreserves}}
 \[\begin{array}{rl}
-       & \SysPreservesP{I_A}{A} \;\wedge\; \SysPreservesP{I_B}{B} \\
+       & (I_B \rightarrow \SysPreservesP{I_A}{A}) \;\wedge\; (I_A \rightarrow \SysPreservesP{I_B}{B}) \\
 \entails & \SysPreservesP{\big(I_A \wedge I_B\big)}{\big(\SysConjoinP{A}{B}\big)}
 \end{array}
 \]
+\label{thm:conjoin-preserves}
 \end{theorem}
 Intuitively, if we start in a state satisfying both $I_A$ and $I_B$, $A$
 guarantees that we stay in $I_A$, and $B$ guarantees that we remain in
 $I_B$, then if both $A$ and $B$ hold, we must remain in the intersection of
-$I_A$ and $I_B$.
+$I_A$ and $I_B$. Note that Theorem~\ref{thm:conjoin-preserves} removes the
+restriction of acyclic parallel composition from
+Theorem~\ref{thm:sys-compose} in Chapter~\ref{chap:memo15}. This is
+possible because the inductive invariants are made explicit.
 
 The difficulty of conjunctive composition lies in justifying \progress{}.
 Even though $A$ and $B$ may independently be \Enabled under the inductive

@@ -5,8 +5,157 @@ prior work in this area, highlighting the commonalities and difference with
 our own work.
 
 \section{Hybrid Automata}
+Hybrid automata~\cite{Henzinger96theoryhybrid,Lynch03IO} extend traditional
+automata with continuous transitions.  The primary reasoning method for
+hybrid automata is model checking~\cite{PHAVerSTTT08,HyTechCAV97}.  There
+have been a number of highly successful implementations such as
+\textsf{HyTech}~\cite{HyTechCAV97}, \textsf{PHAVer}~\cite{PHAVerSTTT08},
+Flow*~\cite{chen2015flow}, and dReach~\cite{kong2015dreach}. While these
+are powerful tools, reachability is only decidable for a very restricted
+class of automata, for example rectangular automata~\cite{HenzingerKPV98}.
+In practice hybrid system model checkers often struggle with large, complex
+systems~\cite{muller2000modelling}. As discussed in
+Chapter~\ref{chap:emsoft16}, hybrid system model checkers cope with the
+complexity by either verifying weaker properties (e.g. bounded safety,
+concrete bounds on quantifiers) or by limiting the structure and arithmetic
+operators within both discrete and continuous transitions. As noted in that
+chapter, the modularity rules presented in that chapter can complement
+automated tools by providing a mechanism to decompose a system into
+components that are in range for full automation. Making this connection
+formal is an interesting direction for future work.
+
+Alur \emph{et al.}~\cite{alur1997modularity} present rules for conjoining
+hybrid automata with syntactically independent interface variables and for
+renaming variables. Our substitution rules generalize substitution
+in~\cite{alur1997modularity} to allow substituting \emph{expressions} for
+variables, requiring us to separately justify \progress{} through
+invertibility of substitution.  Moreover, different modules often need to
+output to the same actuators, and our work pushes beyond the restriction of
+syntactically independent variables.  Finally,
+unlike~\cite{alur1997modularity}, we present rules for disjunctive
+composition.
 
 \section{Deductive logics}
+Hybrid systems have been formalized in proof assistants, including the HHL
+prover~\cite{LiuHHL10,WangHHL2015} and using Platzer's differential dynamic
+logic (\dL{}) in KeYmaera X~\cite{KeYmaeraX}. This section focuses heavily
+on \dL{} as it is the most developed logic for hybrid systems
+(\ref{sec:related-logic-dl}). We also provide a discussion of HHL and other
+work formalizing hybrid systems in general purpose proof assistants
+(\ref{sec:related-logic-other}).
+
+\subsection{Differential Dynamic Logic}
+\label{sec:related-logic-dl}
+The \dL{} logic provides a complete proof
+calculus~\cite{Platzer15substitution} for hybrid systems with compositional
+proof rules similar to Hoare logic~\cite{hoare1971find}.  It has been
+implemented in the KeYmaera X proof assistant~\cite{KeYmaeraX} and applied
+to a large number of case studies,
+including~\cite{platzercruise11,platzer2009formal,platzerrobots13,Arechiga12refinement}.
+
+The work in Chapter~\ref{chap:memo15} complements the \dL{} logic with an
+induction rule specific to sampled-data systems (rather than arbitrary
+hybrid systems) as well as an acyclic parallel composition proof rule,
+applied to compose sensor error/delay compensation modules with safety
+controllers. In addition, that work gives the first formal verification of
+a continuous induction rule (i.e. differential
+induction~\cite{Ghorbal14diffinv}). While the work of this dissertation was
+done in a different logic (LTL for Chapters~\ref{chap:memo15}
+and~\ref{chap:emsoft16} and a trajectory logic for
+Chapter~\ref{chap:exp-smpl}), we believe that all rules can be adapted to
+\dL{}. Doing so is an interested direction for future work, as it will
+allow a user to reap the benefits of the generality of \dL{} with the
+domain specific proof rules of this dissertation, all in a fully formal
+context.
+
+The work in Chapter~\ref{chap:emsoft16} further complements \dL{}'s general
+proof calculus with rules for building sampled-data systems modularly.
+\dL{} is not as expressive as Coq's logic, and some of the proof rules from
+Chapter~\ref{chap:emsoft16} are not expressible in \dL{}, namely those with
+side conditions (\emph{e.g.}  invertible substitutions, disjointness of
+primed variables).  The only way to add these rules to KeYmaera X would be
+to extend its core with soundness-critical checking of side conditions or
+to employ potentially slow and brittle tactics to prove soundness of
+composition on a case-by-case basis.  By working in Coq, we are able to get
+higher-order modular \emph{theorems} without compromising soundness.
+
+Since publication of the work in Chapters~\ref{chap:memo15}
+and~\ref{chap:emsoft16}, there has been work on embedding \dL{} in the Coq
+and Isabelle proof assistants~\cite{Bohrer17-verified-dl}. This is a first
+step towards extending \dL{} with the types of domain-specific proof rules
+found in this dissertation, without compromising soundness. The Coq and
+Isabelle embeddings in ~\cite{Bohrer17-verified-dl} deep embeddings, both
+of the logic's syntax and of the proof theory. This was necessary in order
+to extract a verified version of the KeYmaera X kernel. On the other hand,
+the work in Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16} used a deep
+embedding of the syntax but not the proof theory, while the work in
+Chapter~\ref{chap:exp-smpl} used a fully shallow embedding of the
+logic. Thus, all of the work in this dissertation uses Coq's kernel as the
+proof checking core rather than having a separate verified proof checking
+kernel. Having a range of embeddings within the same domain could
+ultimately permit an evaluation of which embedding is optimal for extending
+the proof calculus with higher-order domain-specific proof rules whose side
+conditions are not expressible within the object logic (e.g. \dL{}).
+
+After publication of the work in Chapters~\ref{chap:memo15}, there was work
+in \dL{} on composition~\cite{Muller16comp,Muller17comp} of hybrid
+systems. The authors provide a form of parallel composition of components,
+allowing components to interact via ports satisfying input and output
+contracts. Unlike the work in Chapter~\ref{chap:emsoft16}, their framework
+explicitly disallows components from outputing to the same variables. This
+makes the paper most comparable to the composition rule
+(Theorem~\ref{thm:sys-compose}) from Chapter~\ref{chap:memo15}. The
+framework from~\cite{Muller16comp,Muller17comp} does remove the restriction
+to acyclic composition from Theorem~\ref{thm:sys-compose}. However,
+parallel composition in that framework is not an associative operation,
+while it is in Chapter~\ref{chap:memo15}. This restricts the flexibility of
+a user in building and composing more than two modules, as we did in
+Section~\ref{sec:delay-comp}. Morever, the work
+from~\cite{Muller16comp,Muller17comp} was not done in a higher-order proof
+assistant. Thus, the theorem is applied in KeYmaera X using an untrusted
+proof tactic. While this does not compromise soundness, it results in
+potentially slow and brittle proofs relative to application of a theorem in
+a proof assistant like Coq.
+
+Finally, the main application result from Chapter~\ref{chap:exp-smpl}
+(Theorem~\ref{thm:x-bound-dbl-int}), while provable in \dL{}, would require
+a combination of proof rules including differential induction and
+differential auxiliaries to emulate exponential barrier certificates and a
+number of discrete rules to handle the discrete transitions introduced by
+the sampled-data model. Most significantly, there is no proof rule that
+allows the control to be treated as continuous while separately bounding
+the error introduced by this approximation. Thus, we complement the general
+\dL{} calculus with powerful higher order proof rules that abstract common
+and natural reasoning patterns for sampled-data systems. Again, working in
+Coq allows us to add these rules as theorems so that we do not compromise
+soundness.
+
+\subsection{Other Logics}
+\label{sec:related-logic-other}
+The HHL prover~\cite{LiuHHL10,WangHHL2015} is an Isabelle/HOL embedding of
+Hybrid Hoare logic. Like KeYmaera X, the HHL prover provides a general
+proof calculus for hybrid systems but does not contain domain-specific
+proof rules like the ones in this dissertation for sampled-data
+systems. Morevoer, the embedding does not contain any rules for verifying
+invariants of continuous flows. Instead, the prover relies on external
+decision procedures that automatically search for invariants. The prover
+assumes that invariants returned by these decision procedures are
+valid. Thus, formalzing theorems for checking invariants of continuous
+flows, as we have done throughout this dissertation, complements the
+decision procedures by preventing a bug in the decision procedures from
+compromising soundness. Instead, theorems like
+Theorem~\ref{thm:barrier-smpl-weak} from Chapter~\ref{chap:exp-smpl} check
+the output of decision procedures that produce invariants.
+
+Other work formalizing hybrid systems in general-purpose proof assistants
+includes~\cite{volker2000towards,mumm-hybrid-pvs,Niqui2008,GeuversKSW10,Collins10ataylor,anand2015roscoq,arechigainvcuts15,Bohrer17-verified-dl}.
+With the exception of~\cite{Bohrer17-verified-dl}, none of this work
+includes formalization of \emph{continuous} induction rules like barrier
+certificates and differential induction or modular proof rules like the
+ones from Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16}. In addition,
+the work in Chapter~\ref{chap:exp-smpl} is the first to formalize the
+powerful exponential condition form of barrier certificates and the first
+to adapt it to sampled-data systems.
 
 \subsection{Temporal Logic}
 The foundation for Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16} is
@@ -57,7 +206,7 @@ these operators can be \emph{combined} to achieve modular verification.
 
 Our theory from Chapter~\ref{chap:emsoft16} is closely related to the work
 on modular construction of nonblocking supervisory controllers in
-discrete-event systems~\cite{wonham1988supervisory-small}.  However, our
+discrete-event systems~\cite{wonham1988supervisory}.  However, our
 models explicitly include differential equations rather than requiring a
 discrete abstraction and do not require a notion of termination in a marked
 state.  Moreover, to the best of our knowledge, none of this work makes the
@@ -71,6 +220,17 @@ However, the focus of switching control theory is optimality, stability,
 and transitionability, whereas we focus on complementary properties like
 bounding the state space.
 %TODO read more about switching control
+
+\subsection{Geofences}
+There has been research on keeping UAVs in a designated safe area, and more
+generally on obstacle avoidance strategies for UAVs. The most related work
+is the recent geofencing strategy developed by Gurriet et
+al~\cite{gurriet16geofence}. This work places constraints on a pilot's
+desired velocity vector to avoid leaving a specified safe region. The
+strategy is complementary to the one described in this paper as it leaves
+the maximum velocity in a given direction unspecified. Future work can look
+at composing their strategy with the concrete velocity constraints
+described in this paper.
 
 \section{Inductive Methods for Hybrid Systems}
 
