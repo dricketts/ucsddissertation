@@ -54,7 +54,7 @@
 
 \newcommand{\ProofRule}[1]{\textsc{#1}}
 
-\newcommand{\defined}{\triangleq}
+\newcommand{\defined}{\equiv}
 
 \newcommand{\entails}{\vdash}
 
@@ -92,6 +92,7 @@
 
 \newcommand{\append}[2]{#1 \cup #2}
 \newcommand{\Solves}[3]{\ensuremath{\mathsf{Solves}(#1,#2,#3)}}
+\newcommand{\N}{\ensuremath{\mathbb{N}}}
 \newcommand{\R}{\ensuremath{\mathbb{R}}}
 \newcommand{\Rnneg}{\R_{\geq 0}}
 \newcommand{\Rpos}{\R_{> 0}}
@@ -146,19 +147,18 @@
 \newcommand{\dL}{\ensuremath{\mathsf{dL}}}
 \newcommand{\defeq}{\defined}
 \newcommand{\AlwaysT}[2]{\always{}_{#1} #2}
-\newcommand{\evolvessmpl}[2]{\{#1~|~#2\}}
-\newcommand{\evolvescont}[1]{\{#1\}}
+\newcommand{\evolvessmpl}[2]{\{#1\}_{#2}}
 \newcommand{\violation}{2\umaxc T}
 \newcommand{\ignorearg}{\cdot}
 \newcommand{\Bx}{B_2}
 \newcommand{\Bpw}{B_1}
 
-\newcommand{\vecbold}[1]{\boldsymbol{#1}}
+\newcommand{\vecbold}[1]{\mathbf{#1}}
 \newcommand{\umax}{\mu}
 \newcommand{\umaxc}{\tilde{\umax}}
 \newcommand{\p}{\gamma}
 \newcommand{\q}{\alpha}
-\newcommand{\state}{\mathcal{R}^n}
+\newcommand{\state}{\R^n}
 \newcommand{\dotprod}{\bullet}
 
 \newcommand{\trajectory}[1]{\Rnneg \rightarrow \R^#1}
