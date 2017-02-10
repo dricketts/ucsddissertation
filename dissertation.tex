@@ -29,7 +29,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{contour}
-%\usepackage{amsthm}
+\usepackage{amsthm}
 \usepackage{xcolor}
 \usepackage{bussproofs}
 \usepackage{listings}
@@ -47,6 +47,8 @@
 \usepackage{changebar}
 \usepackage{subcaption}
 \usepackage{enumitem}
+\usepackage{thmtools}
+\usepackage{thm-restate}
 
 \usetikzlibrary{calc}
 \usetikzlibrary{backgrounds}
@@ -56,9 +58,10 @@
 \usetikzlibrary{decorations.markings}
 \usetikzlibrary{positioning}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\newtheorem{definition}{Definition}
+\declaretheorem[name=Theorem,numberwithin=chapter]{theorem}
+\newtheorem{lemma}{Lemma}[chapter]
+\declaretheorem[name=Definition,numberwithin=chapter]{definition}
+\newtheorem{assumption}{Assumption}[chapter]
 
 % Required information
 \title{Verification of Sampled-Data Systems using Coq}
@@ -243,17 +246,19 @@ the extremely high manual labor cost required to produce these proofs.
 Mitigating this manual proof burden requires powerful higher-order proof
 rules that capture common proof strategies. Prior work in deductive
 verification has approached this task by designing general-purpose,
-complete proof calculi for hybrid systems~\cite{platzer???,HHL???}. Hybrid
-systems are CPS models comprised of both a discrete component (e.g. control
+complete proof calculi for hybrid
+systems~\cite{Platzer15substitution,LiuHHL10,WangHHL2015}. Hybrid systems
+are CPS models comprised of both a discrete component (e.g. control
 software) and a continuous component (the physical world). While powerful,
 the generality of the proof calculi prevents them from leveraging
 particular common characteristics of cyber-physical systems. For example,
-no proof rule in~\cite{platzer??} assumes that the time between executions
-of a controller is bounded because this is not true of all hybrid
-systems. However, this is true of many realistic hybrid systems, and proofs
-about such systems will tend to follow a similar proof structure. Thus, it
-is beneficial to complement general hybrid system proof rules with domain
-specific proof rules that capture common reasoning patterns.
+no proof rule in~\cite{Platzer15substitution} assumes that the time between
+executions of a controller is bounded because this is not true of all
+hybrid systems. However, this is true of many realistic hybrid systems, and
+proofs about such systems will tend to follow a similar proof
+structure. Thus, it is beneficial to complement general hybrid system proof
+rules with domain specific proof rules that capture common reasoning
+patterns.
 
 This dissertation presents and applies a series of proof rules that capture
 common reasoning patterns in the important domain of \emph{periodic
@@ -302,7 +307,7 @@ Finally, in \textbf{Chapter~\ref{chap:exp-smpl}}, we revisit verification
 of a single sampled-data system component. Contrary to our prior
 approaches, we began by building a geofence that was good enough to be
 adopted by the popular open source UAV autopilot called
-Ardupilot~\cite{???}. After building such a module (now available in the
+Ardupilot~\cite{ardupilot}. After building such a module (now available in the
 latest Ardupilot release), we attempted to formally verify a component of
 it in Coq, particularly the logic that prevents the vehicle from violating
 a boundary in a single spatial dimension. Similar logic is present in the
@@ -331,15 +336,27 @@ approach by decomposing verification into a condition on the continuous
 time approximation and another on the approximation error.  This rule
 allows one to perform the majority of reasoning in a purely continuous
 model using powerful techniques resulting from over a century of control
-theory research.
+theory research~\cite{kong2013barrier,xu15barrier,nguyen16barrier}.
 
 As already mentioned, our running application in this work is a geofencing
 controller for UAVs, an important application due to their potential safety
-thread combined with widespread use by hobbyists and businesses alike. We
-would like to ensure that the controller we build and verify are not toy
-models. We have attempted to justify the realistic nature of our work by
-flying the controllers we verify on an actual quadcopter. Throughout this
-dissertation, we discuss lessons learned from this experience.
+threat combined with widespread use by hobbyists and businesses alike. We
+formally model such systems using the double integrator from control
+theory, in which the controller affects the acceleration (second
+derivative) of position. This is an approximation of reality, as the actual
+quadcopter controller affects the angular torque of the vehicle. The
+angular torque is related to the second derivative of position via complex
+attitude dynamics. Although our model is an approximation, the double
+integrator is a benchmark problem for robotics, vehicles, and other systems
+that involve a point mass moving in space~\cite{rao2001naive}. Thus, the
+double integrator serves as a canonical example for evaluating the
+expressiveness of the proof rules presented in this dissertation.
+
+Since we use an approximate model of UAV dynamics, we would like to ensure
+that the controllers we build and verify are not toys. We have attempted to
+justify the realistic nature of our work by flying the controllers we
+verify on an actual quadcopter. Throughout this dissertation, we discuss
+lessons learned from this experience.
 
 Rigorous verification requires that results be mechanically checked in some
 way. Rather than implementing a standalone tool for this task, we performed
@@ -384,6 +401,7 @@ applications in this document provide evidence for this claim.
 
 \chapter{}
 \label{chap:exp-smpl}
+\input{exp-smpl}
 
 \chapter{Related Work}
 \label{chap:related}
