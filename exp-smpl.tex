@@ -694,12 +694,12 @@ physical limit $\umax$.
 We have implemented all of the results of this chapter in the Coq proof
 assistant. The core theory required 571 lines of definitions and 528 lines
 of proof, while the geofence model required 90 lines of definitions and 136
-lines of proof. Prior work on a double integrator
-geofence~\cite{ricketts2016composition} (called the Second-Derivative
-Controller in that paper) required 484 lines of proof, despite simpler
-constraints on the control law. This is solid evidence that
-Theorems~\ref{thm:barrier-smpl} and~\ref{thm:barrier-smpl-weak} have the
-potential to considerably reduce the formal proof burden for safety of
+lines of proof. On the other hand, the Second-Derivative Controller from
+Chapter~\ref{chap:emsoft16}, verified without the barrier function theorems
+of this chapter, required 484 lines of proof, despite simpler constraints
+on the control law. This provides evidence that
+Theorem~\ref{thm:barrier-smpl} and Lemma~\ref{thm:barrier-smpl-weak} have
+the potential to considerably reduce the formal proof burden for safety of
 sampled-data systems.
 %TODO update these numbers if proof dev changes
 
@@ -740,7 +740,9 @@ e_4 & \text{otherwise}
 \]
 \label{lem:pw-deriv}
 \end{lemma}
-%TODO figure out if this is novel
+
+To the best of our knowledge, this is the first formal verification
+framework for hybrid systems that can handle piecewise functions.
 
 \subsection{Logics in Coq}
 %TODO should we talk about benefit of shallow encoding?
@@ -769,14 +771,14 @@ predicate entailment. However, Platzer's differential dynamic logic
 about this condition. Charge! could allow us to easily build \dL{} as a
 logic in Coq and re-phrase this condition in terms of \dL{}.
 
-\section{Conclusion}
-\label{sec:conclusion}
-The difficulty of hybrid system verification demands that we have a variety
-of higher-order proof rules at our disposal. This work adds one such
-powerful tool to the arsenal for the important class of sampled-data
-systems. Moreover, we show how leveraging the expressiveness of a
-higher-order proof assistant (Coq) allows us to extend the set of operators
-that are in scope for formal verification using barrier certificates.
+%% \section{Conclusion}
+%% \label{sec:conclusion}
+%% The difficulty of hybrid system verification demands that we have a variety
+%% of higher-order proof rules at our disposal. This work adds one such
+%% powerful tool to the arsenal for the important class of sampled-data
+%% systems. Moreover, we show how leveraging the expressiveness of a
+%% higher-order proof assistant (Coq) allows us to extend the set of operators
+%% that are in scope for formal verification using barrier certificates.
 
 % Talk about how existing work is great for general hybrid systems, but we
 % focus on writing higher order theorems that leverage the structure of
