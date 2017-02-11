@@ -77,7 +77,7 @@ the expressive Coq proof assistant. This allows us to verify the critical
 piecewise invariant arising in the Ardupilot controller.
 
 \section{Overview}
-\label{sec:overview}
+\label{sec:exp-smpl-overview}
 Ardupilot is a popular open source autopilot installed in over 1,000,000
 vehicles, including quadcopters and other UAVs~\cite{ardupilot}. The
 geofence module allows one to specify a 2D polygon safe region. The pilot
@@ -140,7 +140,7 @@ implementation of our results with Section~\ref{sec:differentiation}
 describing how we extend formal verification using barrier certificate to
 piecewise functions.
 
-\section{Model}
+\section{Logic}
 \label{sec:model}
 This chapter uses a different formal framework than the previous
 chapters. Rather than linear temporal logic, we use a logic over system
@@ -229,101 +229,65 @@ F \models \AlwaysT{\Delta}{P} \defeq \forall 0 \leq t \leq \Delta : F(t) \models
 \label{def:bounded-always}
 \end{definition}
 
-\subsection{Geofence model}
-We reason about an approximation of the geofence stopping control law by
-modeling the system as a double integrator. We would like to reason about
-conditions on the initial state under which the position of the system
-($x$) will not exceed some constant. We state this precisely in the
-following theorem:
-
-\begin{restatable}{theorem}{xbounddblint}
-\[
-\begin{array}{clc}
-&
-\Bpw (x,v) \leq (\violation) \cdot \Delta & \wedge \\
-&
-x \leq (\violation) \cdot \Delta & \wedge \\
-&
-\evolvessmpl{\dt{x} = v, \dt{v} = u(x_k,v_k)}{\Delta} & \\
-\entails
-&
-\Always{x \leq (\violation) \cdot \Delta} &
-\end{array}
-\]
-\label{thm:x-bound-dbl-int}
-\end{restatable}
-
-In Section~\ref{sec:proof-geofence}, we will derive conditions on $u$ and
-the sampling bound $\Delta$ such that Theorem~\ref{thm:x-bound-dbl-int}
-holds. In addition, the conditions on $u$ will not violate the constraint
-$\forall x, v : |u(x,v)| \leq \umax$, which represent physical limitations
-on acceleration of the system, such as the above mentioned maximum braking
-force.
-
-% Do we present the control law here or derive it in the barrier certificate section
-% Probably we leave it for later sections
-
-\section{Safety proof}
-\label{sec:proof}
+\section{Exponential barrier certificates}
+\label{sec:proof-barrier}
 Deductive approaches to hybrid system verification typically involve a
 continuous analogue of induction. Barrier certificates are one such
 technique. In the typical formulation of barrier certificates, one proves
-the invariance of $B(\vecbold{x}) \leq 0$ by proving that the value of
-$B(\vecbold{x})$ does not increase along trajectories of the system. Recent
-work from control theory has relaxed this requirement -- the rate of change
-of $B(\vecbold{x})$ along trajectories must be proportional to its
-value. This allows the value of $B(\vecbold{x})$ to increase along
-trajectories, but requires that the rate of change slow as trajectories
-approach the boundary $B(\vecbold{x}) = 0$. Essentially, $B(\vecbold{x})$
-can exponentially decay towards the boundary but never cross it.
+the invariance of $B(\vecbold{z}) \leq 0$ by proving that the value of
+$B(\vecbold{z})$ does not increase along trajectories of the system. Recent
+work from control theory~\cite{kong2013barrier} has relaxed this
+requirement -- the rate of change of $B(\vecbold{z})$ along trajectories
+must be proportional to its value. This allows the value of
+$B(\vecbold{z})$ to increase along trajectories, but requires that the rate
+of change slow as trajectories approach the boundary $B(\vecbold{z}) =
+0$. Essentially, $B(\vecbold{z})$ can exponentially decay towards the
+boundary but never cross it.
 
-In Section~\ref{sec:proof-barrier}, we present two barrier certificate
-theorems. First, we demonstrate an unmodified version of exponential
-barrier certificates for sampled-data systems and explain why this
-formulation is insufficient (Theorem~\ref{thm:barrier-smpl-weak}). Then we
+In this section, we present two barrier certificate proof rules for
+sampled-data systems.  The first (Lemma~\ref{thm:barrier-smpl-weak}) is a
+trivial adaptation of the rule from~\cite{kong2013barrier} to sampled-data
+systems. We explain why this rule, by itself, is insufficient.  Then we
 present our new version of exponential barrier certificates for
 sampled-data systems that decomposes verification into an exponential decay
 property of the continuous time system approximation and two simple
 properties about the intersample behavior
-(Theorem~\ref{thm:barrier-smpl}). In Section~\ref{sec:proof-geofence}, we show
-how to use our formulation of barrier certificates to reason about the
-geofence model~\eqref{eq:abstract-geofence-entails}. All results in this
-section have been formalized in the Coq proof assistant. To the best of our
-knowledge, this is the first such formalization of exponential barrier
-certificates.
+(Theorem~\ref{thm:barrier-smpl}). In Section~\ref{sec:proof-geofence}, we
+show how to use these proof rules to reason about the Ardupilot
+controller. All results in this section have been formalized in the Coq
+proof assistant. To the best of our knowledge, this is the first such
+formalization of exponential barrier certificates.
 
-\subsection{Exponential barrier certificates}
-\label{sec:proof-barrier}
 Barrier certificates are functions $B \in \R^n \rightarrow \R$ that assign
-a scalar to every state. One establishes the invariance of $B(\vecbold{x})
-\leq 0$ by proving a property about the rate of change of $B(\vecbold{x})$
+a scalar to every state. One establishes the invariance of $B(\vecbold{z})
+\leq 0$ by proving a property about the rate of change of $B(\vecbold{z})$
 along trajectories of the system. Formally, $\nabla B \dotprod
-f(\vecbold{x},\vecbold{x_k})$ gives the rate of change or time derivative
+f(\vecbold{z},\vecbold{z_k})$ gives the rate of change or time derivative
 of $B$ along trajectories of the system, also known as the Lie derivative
 of $B$. Here, $\nabla B$ denotes the gradient of $B$, or vector of partial
 derivatives $[\frac{\partial B}{\partial x_1},\ldots,\frac{\partial
     B}{\partial x_n}]$.
 
-Theorem~\ref{thm:barrier-smpl-weak} gives an immediate adaptation of
-barrier certificates from~\cite{kong2013barrier} to sampled-data systems.
+Lemma~\ref{thm:barrier-smpl-weak} gives our trivial adaptation of barrier
+certificates from~\cite{kong2013barrier} to sampled-data systems.
 
 \begin{lemma}
-If there exists a continuously differentiable function $B \in \R^n
-\rightarrow \R$, a constant $\lambda \in \R$, and a state predicate $P$
-such that
+Consider a continuously differentiable function $B \in \R^n \rightarrow
+\R$, constants $\lambda \in \R$ and $\Delta \in \Rpos$, and a state
+predicate $P$. If the following condition holds:
 \[
-\forall \vecbold{x}, \vecbold{x_k} \in \{\vecbold{y} \in \R^n~|~\vecbold{y} \models P\} : \nabla B \dotprod f(\vecbold{x},\vecbold{x_k}) \leq \lambda B(\vecbold{x})
+\forall \vecbold{z}, \vecbold{z_k} \in \{\vecbold{y} \in \R^n~|~\vecbold{y} \models P\} : \nabla B \dotprod f(\vecbold{z},\vecbold{z_k}) \leq \lambda B(\vecbold{z})
 \]
 then
 \[
 \begin{array}{cl}
 &
-B(\vecbold{x}) \leq 0~\wedge~
+B(\vecbold{z}) \leq 0~\wedge~
 \Always{P}~\wedge~
-\evolvessmpl{\dt{\vecbold{x}}(t) = f(\vecbold{x}(t),\vecbold{x}(t_k))}{t_0,t_1,\ldots} \\
+\evolvessmpl{\dt{\vecbold{z}} = f(\vecbold{z},u(\vecbold{z_k}))}{\Delta} \\
 \entails
 &
-\Always{B(\vecbold{x}) \leq 0}
+\Always{B(\vecbold{z}) \leq 0}
 \end{array}
 \]
 \label{thm:barrier-smpl-weak}
@@ -332,34 +296,32 @@ B(\vecbold{x}) \leq 0~\wedge~
 % essentially a combination of differential cut and the exponential
 % condition, but doesn't seem to have been stated together anywhere.
 
-% TODO: still need to cite exponential barrier certificate papers to
-% justify not putting a proof in the paper.
-Theorem~\ref{thm:barrier-smpl-weak} states that if $B(\vecbold{x}) \leq 0$
+Lemma~\ref{thm:barrier-smpl-weak} states that if $B(\vecbold{z}) \leq 0$
 holds initially, and if, assuming a known invariant $P$, the time
 derivative of $B$ is at most proportional to its value, then
-$B(\vecbold{x}) \leq 0$ is an invariant.
+$B(\vecbold{z}) \leq 0$ is an invariant.
 
 While this theorem is powerful for continuous time systems, it is lacking
 for sampled-data systems. The problem is that the premise of the theorem
 does not constrain the relationship between the sampled state
-$\vecbold{x_k}$ and the current state $\vecbold{x}$. However, as we will
+$\vecbold{z_k}$ and the current state $\vecbold{z}$. However, as we will
 see, this theorem still has utility. In particular, once an invariant $P$
 has been established using Theorem~\ref{thm:barrier-smpl},
-Theorem~\ref{thm:barrier-smpl-weak} can be used to establish a new
-invariant using the invariance of $P$.
+Lemma~\ref{thm:barrier-smpl-weak} can be used to establish a new invariant
+using the invariance of $P$.
 
 We would like the premise of Theorem~\ref{thm:barrier-smpl-weak} to be
-relaxed so that the control input (informally, the second argument to $f$)
-is applied continuously. In other words, we would like to only prove
-$\nabla B \dotprod f(\vecbold{x},\vecbold{x}) \leq \lambda B(\vecbold{x})$
-rather than $\nabla B \dotprod f(\vecbold{x},\vecbold{x_k}) \leq \lambda
-B(\vecbold{x})$. We can achieve this relaxation if we can establish an
-additional condition on the intersample behavior: the time derivative of
-$B$ does not change by more than a constant $C$ between samples. Under such
-a condition, the property $B(\vecbold{x}) \leq 0$ is not an invariant, but
-$B(\vecbold{x}) \leq C\cdot T$ is. This mirrors a control design practice
--- treat the controller as continuous and add a constant safety buffer to
-account for the approximation error.
+relaxed so that the control input $u$ is applied continuously. In other
+words, we would like to only prove $\nabla B \dotprod
+f(\vecbold{z},\vecbold{z}) \leq \lambda B(\vecbold{z})$ rather than $\nabla
+B \dotprod f(\vecbold{z},\vecbold{z_k}) \leq \lambda B(\vecbold{z})$. We
+can achieve this relaxation if we can establish an additional condition on
+the intersample behavior: the time derivative of $B$ does not change by
+more than a constant $C$ between samples. Under such a condition, the
+property $B(\vecbold{z}) \leq 0$ is not an invariant, but $B(\vecbold{z})
+\leq C\cdot \Delta$ is. This mirrors a control design practice -- treat the
+controller as continuous and add a constant safety buffer to account for
+the approximation error.
 
 This argument is formalized in
 Theorem~\ref{thm:barrier-smpl}. Condition~\eqref{thm:barrier-smpl-exp} is
@@ -375,31 +337,29 @@ establish~\eqref{thm:barrier-smpl-deriv-change}.
 
 \begin{theorem}
 Consider a continuously differentiable function $B \in \R^n \rightarrow
-\R$, constants $C,T \in \Rpos$, a state predicate $P$, a state relation
-$S$, and sample times $0 = t_0 < t_1 < \ldots < t_k < \ldots$ such that
-$\forall k, t_{k+1} - t_k \leq T$. If the following conditions hold
-
+\R$, constants $C,\Delta \in \Rpos$, a state predicate $P$, and a state
+relation $S$. If the following conditions hold:
 \begin{enumerate}[label=\roman*), ref=\roman*]
 \item
 \label{thm:barrier-smpl-exp}
-$\forall \vecbold{x} \in \{\vecbold{y} \in \R^n~|~\vecbold{y} \models P\} : \nabla B \dotprod f(\vecbold{x},\vecbold{x}) \leq -\frac{B(\vecbold{x})}{T}$
+$\forall \vecbold{z} \in \{\vecbold{y} \in \R^n~|~\vecbold{y} \models P\} : \nabla B \dotprod f(\vecbold{z},\vecbold{z}) \leq -\frac{B(\vecbold{z})}{\Delta}$
 \item
 \label{thm:barrier-smpl-inter}
-$\forall \vecbold{x_k} \in \R^n : \vecbold{x} = \vecbold{x_k} \wedge \evolvessmpl{\dt{\vecbold{x}} = f(\vecbold{x},\vecbold{x_k})}{0,T,\ignorearg} \entails \AlwaysT{T}{(\vecbold{x}_k,\vecbold{x}) \in S}$
+$\forall \vecbold{z_k} \in \R^n : \vecbold{z} = \vecbold{z_k} \wedge \evolvessmpl{\dt{\vecbold{z}} = f(\vecbold{z},\vecbold{z_k})}{\Delta} \entails \AlwaysT{\Delta}{(\vecbold{z}_k,\vecbold{z}) \in S}$
 \item
 \label{thm:barrier-smpl-deriv-change}
-$\forall (\vecbold{x_k}, \vecbold{x}) \in S : \nabla B \dotprod f(\vecbold{x},\vecbold{x_k}) \leq \max{(\nabla B \dotprod f(\vecbold{x_k},\vecbold{x_k}) + C,0)}$
+$\forall (\vecbold{z_k}, \vecbold{z}) \in S : \nabla B \dotprod f(\vecbold{z},\vecbold{z_k}) \leq \max{(\nabla B \dotprod f(\vecbold{z_k},\vecbold{z_k}) + C,0)}$
 \end{enumerate}
 then
 \[
 \begin{array}{cl}
 &
-B(\vecbold{x}) \leq C \cdot T~\wedge~
+B(\vecbold{z}) \leq C \cdot \Delta~\wedge~
 \Always{P}~\wedge~
-\evolvessmpl{\dt{\vecbold{x}}(t) = f(\vecbold{x}(t),\vecbold{x}(t_k))}{t_0,t_1,\ldots} \\
+\evolvessmpl{\dt{\vecbold{z}} = f(\vecbold{z},u(\vecbold{z_k}))}{\Delta} \\
 \entails
 &
-\Always{B(\vecbold{x}) \leq C \cdot T}
+\Always{B(\vecbold{z}) \leq C \cdot \Delta}
 \end{array}
 \]
 \label{thm:barrier-smpl}
@@ -409,42 +369,89 @@ B(\vecbold{x}) \leq C \cdot T~\wedge~
 For any $k$ and for any $t \in [t_k, t_{k+1})$,
 \begin{align}
 \nonumber
-B(\vecbold{x}(t)) - B(\vecbold{x}(t_k)) &= \int_{t_k}^t \nabla B \dotprod f(\vecbold{x}(\tau),\vecbold{x}(t_k)) d\tau\\
+B(\vecbold{z}(t)) - B(\vecbold{z}(t_k)) &= \int_{t_k}^t \nabla B \dotprod f(\vecbold{z}(\tau),\vecbold{z}(t_k)) d\tau\\
 \tag{by~\eqref{thm:barrier-smpl-deriv-change} and~\eqref{thm:barrier-smpl-inter}}
-&\leq \int_{t_k}^t \big(\max{(\nabla B \dotprod f(\vecbold{x}(t_k),\vecbold{x}(t_k)) + C,0)}\big) d\tau \\
+&\leq \int_{t_k}^t \big(\max{(\nabla B \dotprod f(\vecbold{z}(t_k),\vecbold{z}(t_k)) + C,0)}\big) d\tau \\
 \tag{by~\eqref{thm:barrier-smpl-exp}}
-&\leq \int_{t_k}^t \left(\max({-\frac{B(\vecbold{x}(t_k))}{T} + C,0)}\right) d\tau \\
+&\leq \int_{t_k}^t \left(\max({-\frac{B(\vecbold{z}(t_k))}{\Delta} + C,0)}\right) d\tau \\
 \nonumber
-&= (t - t_k) \cdot \left(\max{(-\frac{B(\vecbold{x}(t_k))}{T} + C,0)}\right)
+&= (t - t_k) \cdot \left(\max{(-\frac{B(\vecbold{z}(t_k))}{\Delta} + C,0)}\right)
 \end{align}
 
-Therefore, for any $k$ and any $t \in [t_k,t_{k+1})$, since $t - t_k \leq T$,
+Therefore, for any $k$ and any $t \in [t_k,t_{k+1})$, since $t - t_k \leq Delta$,
 \begin{equation}
-B(\vecbold{x}(t_k)) \leq C\cdot T \implies B(\vecbold{x}(t)) \leq C\cdot T
+B(\vecbold{z}(t_k)) \leq C\cdot \Delta \implies B(\vecbold{z}(t)) \leq C\cdot \Delta
 \end{equation}
-By induction on $k$, $\forall t \geq 0 : B(\vecbold{x}(t)) \leq C\cdot T$
+By induction on $k$, $\forall t \geq 0 : B(\vecbold{z}(t)) \leq C\cdot \Delta$
 \end{proof}
 
-Note that in condition~\eqref{thm:barrier-smpl-inter} of
-Theorem~\ref{thm:barrier-smpl}, the first two samples occur at 0 and
-$T$. The rest of the samplings are irrelevant because the property to the
-right of the entailment is only bounded invariance. Also note the $\max{}$
-in condition~\eqref{thm:barrier-smpl-deriv-change} of
+Note the $\max{}$ in condition~\eqref{thm:barrier-smpl-deriv-change} of
 Theorem~\ref{thm:barrier-smpl}. The intersample derivative of $B$ does not
 need to be close to the sample time derivative of $B$ as long as it is
 non-positive. This subtlety bares a resemblance to the normal formulation
 of barrier certificates in which the time derivative of $B$ must always be
 non-positive.
 
-\subsection{Geofence safety proof}
+\section{Ardupilot controller}
 \label{sec:proof-geofence}
 Now that we have established the general theory, we can use it to reason
-about our double integrator geofence model. As we described in
-Section~\ref{sec:overview}, the geofence module works by enforcing a
-velocity restriction that is a piecewise function of the distance from the
-boundary. Close to the boundary, the velocity limit is linear in the
-distance, while far away, the velocity limit is proportional to the square
-root of the distance. This relationship is depicted in
+about a double integrator model of the Ardupilot controller, whose
+intersample behavior is given by:
+\[
+\dt{x} = v, \dt{v} = u(x_k,v_k)
+\]
+The control law $u$ is designed to enforce $x \leq 0$.  We begin this
+section by describing how $u$ is designed to (almost) achieve this
+objective. As mentioned in Section~\ref{sec:exp-smpl-overview}, the control
+law design comes in the form of state-dependent upper bounds on the control
+signal $u$. As described in that section, the actual control law
+implementation takes the minimum of the pilot's desired acceleration and
+those constraints.
+
+The Ardupilot control law was designed assuming that the law is applied
+continuously (not as a sampled-data system). This approximation simplifies
+design and reasoning but also introduces an error, which actually results
+in a violation of $x \leq 0$. We will ultimately apply
+Theorem~\ref{thm:barrier-smpl} to quantify this violation.
+
+Relevant to the controller design are the physical constraints on the
+system, particularly the maximum possible acceleration. Since we are
+interested in a controller that stops the system's position from violating
+some boundary, the important physical constraint is a limit on the system's
+braking acceleration. That is, we need to ensure that the control law does
+not require deceleration of a greater magnitude than is physically
+possible. We denote by $\umax$ this magnitude -- we need to ensure that the
+system never reaches a state $x,v$ in which $u(x,v) < -\umax$.
+
+Since the stopping distance for a particle with acceleration $a$ and
+initial velocity $v$ is $\frac{v^2}{2a}$, the $\umax$ constraint implies
+that the system must enforce the following invariant:
+\[
+x \leq \frac{\max{(v,0)}^2}{2\umax}
+\]
+However, since the controller was designed under a continuous time
+approximation, the invariant needs to be strengthened by using a more
+conservative braking acceleration $\umaxc < \umax$. At the end of this
+section, we will give precise conditions on $\umaxc$ to ensure that the
+system never reaches a state $x,v$ in which $u(x,v) < -\umax$. The
+strengthened invariant is thus:
+\[
+x \leq \frac{\max{(v,0)}^2}{2\umaxc}
+\]
+This invariant is still insufficient. The problem is that such an invariant
+will result in a control discontinuity at the position boundary $x =
+0$. This occurs if the system is in a state in which $x =
+\frac{\max{(v,0)}^2}{2\umaxc}$. Such a state requires that the controller
+issue constant acceleration $-\umaxc < 0$ when $x < 0$ and permits zero
+acceleration when $x = 0$. As described in the introduction, such a control
+law produces undesirable oscillations at the boundary and is physically
+impossible.
+
+To solve this problem, the Ardupilot developers designed a more
+conservative invariant that is a piecewise function of the distance from
+the boundary. Close to the boundary, the velocity limit is linear in the
+distance, while farther away, the velocity limit is proportional to the
+square root of the distance. This relationship is depicted in
 Figure~\ref{fig:sqrt-lin}. Notice that the piecewise transition between
 these two relationships occurs where they are tangent. This ensures that
 (a) a barrier certificate describing the region is continuously
@@ -484,28 +491,14 @@ x + \frac{\umaxc \p^2}{2} + \frac{v^2}{2\umaxc} & \text{otherwise}
 \end{cases}
 \label{eq:barrier-piecewise-dbl-int}
 \end{equation}
-for constants $\p > 0$ and $0 < \umaxc < \umax$. We introduce $\umaxc$ here
-to again mirror the design process of the ardupilot engineers. The constant
-$\umax$ is a physical limitation of the system that cannot be
-violated. Designing the geofence module assuming a continuous controller
-necessarily introduces an error (as formalized in
-Theorem~\ref{thm:barrier-smpl}), which means that $\Bpw (x,v) \leq 0$ can
-be violated by a constant amount. Thus, if $\Bpw$ were a function of
-$\umax$, the system would be able to reach a state in which a control input
-exceeding $\umax$ would be required. By making $\Bpw$ a function of
-$\umaxc$, we create a buffer so that such a situation never occurs. At the
-end of this section, we will provide preciseconditions on $\umaxc$ to
-ensure that the control input magnitude never violates $\umax$.
-
-We now take a two step process to prove the invariance of $x \leq K$ for
-some constant $K$. First, we use Theorem~\ref{thm:barrier-smpl} and
-constraints on $u$ to prove the invariance of $\Bpw (x,v) \leq K$. Then we
-use Theorem~\ref{thm:barrier-smpl-weak} and the invariance of $\Bpw (x,v)
-\leq K$ to prove the invariance of $x \leq K$. The assumptions on $u$ are
-as follows:
-
-% TODO make the connection between this assumption and a concrete control
-% law
+Our goal is to (almost) enforce the invariance of $x \leq 0$ -- that is, we
+would like to enforce $x \leq K$ for some positive constant $K$.  We now
+take a two step process to prove the invariance of $x \leq K$ for some
+constant $K$. First, we use Theorem~\ref{thm:barrier-smpl} and constraints
+on $u$ to prove the invariance of $\Bpw (x,v) \leq K$. Then we use
+Lemma~\ref{thm:barrier-smpl-weak} and the invariance of $\Bpw (x,v) \leq K$
+to prove the invariance of $x \leq K$. The assumptions on $u$ are as
+follows:
 \begin{assumption}
 For any $x,v \in \R$,
 \[
@@ -522,14 +515,19 @@ Note that the division by $v$ in the second branch of
 assumption~\ref{ass:u_pw_bound} is not problematic, since in that branch,
 $v > \umaxc\p > 0$.
 
+Since the control law was designed using a continuous time approximation,
+we need to put a constant upper bound on the control in order to bound the
+intersample behavior and thus apply Theorem~\ref{thm:barrier-smpl}. Such a
+bound is captured in the following assumption:
 \begin{assumption}
-$\forall x, v \in \R : -\umax \leq u(x,v) \leq \umaxc$
+$\forall x, v \in \R : u(x,v) \leq \umaxc$
 \label{ass:u_umax_bound}
 \end{assumption}
 
 Theorem~\ref{thm:barrier-smpl} requires reasoning about the time derivative
 of $\Bpw$, which is given by~\eqref{eq:dbarrier-piecewise-dbl-int}. The
-formal details of proving~\eqref{eq:dbarrier-piecewise-dbl-int} are
+formal details details of reasoning about Lie derivatives of piecewise
+functions, like the one in~\eqref{eq:dbarrier-piecewise-dbl-int} are
 deferred to Section~\ref{sec:differentiation}.
 %TODO explain why we quantify over v and v_k but not x and x_k
 \begin{equation}
@@ -547,27 +545,28 @@ Theorem~\ref{thm:barrier-smpl} for $\Bpw$.
 \begin{lemma}[Condition~\eqref{thm:barrier-smpl-exp}]
 For any $x,v \in \R$,
 \[
-\nabla \Bpw \dotprod [v,u(x,v)] \leq -\frac{\Bpw (x,v)}{T}
+\nabla \Bpw \dotprod [v,u(x,v)] \leq -\frac{\Bpw (x,v)}{\Delta}
 \]
 \label{lem:exp-condition-dbl-int}
 \end{lemma}
 \begin{proof}
-By assumption~\ref{ass:u_pw_bound} and first order reasoning over real arithmetic.
+Solving the above in equality for $u$ results in exactly the inequality in
+assumption~\ref{ass:u_pw_bound}.
 \end{proof}
 
 \begin{lemma}[Condition~\eqref{thm:barrier-smpl-inter}]
 For any $x_k, v_k \in \R$,
 \[
 \begin{array}{cl}
-& x = x_k~\wedge~v=v_k~\wedge~\evolvessmpl{\dt{x}=v,\dt{v}=u(x_k,v_k)}{\ignorearg} \\
+& x = x_k~\wedge~v=v_k~\wedge~\evolvessmpl{\dt{x}=v,\dt{v}=u(x_k,v_k)}{\Delta} \\
 \entails
-& \AlwaysT{T}{v \leq v_k + \max{(u(x_k,v_k), 0)}\cdot T}
+& \AlwaysT{\Delta}{v \leq v_k + \max{(u(x_k,v_k), 0)}\cdot \Delta}
 \end{array}
 \]
 \label{lem:intersmpl-dbl-int}
 \end{lemma}
 \begin{proof}
-By integration of $v$ from 0 to $T$.
+By integration of $v$ from 0 to $\Delta$.
 \end{proof}
 
 The intersample dynamics are sufficiently simple that
@@ -581,7 +580,7 @@ interesting direction for future work.
 
 \begin{lemma}[Condition~\eqref{thm:barrier-smpl-deriv-change}]
 For any $x_k, x, v_k, v \in \R$ such that $v \leq v_k + \max{(u(x_k,v_k),
-  0)}\cdot T$,
+  0)}\cdot \Delta$,
 \[
 \nabla \Bpw \dotprod [v,u(x_k,v_k)] \leq \nabla \Bpw \dotprod [v_k,u(x_k,v_k)] + \violation
 \]
@@ -602,19 +601,17 @@ sampled-data domain.
 
 Given Lemmas~\ref{lem:exp-condition-dbl-int},~\ref{lem:intersmpl-dbl-int},
 and~\ref{lem:deriv-change-dbl-int}, we can now prove the invariance of
-$\Bpw (x,v) \leq (\violation) \cdot T$.
+$\Bpw (x,v) \leq (\violation) \cdot \Delta$.
 
 \begin{lemma}
-Assume sample times $0 = t_0 < t_1 < \ldots < t_k < \ldots$ such that
-$\forall k, t_{k+1} - t_k \leq T$. Then the following entailment holds:
 \[
 \begin{array}{clc}
 &
-\Bpw (x,v) \leq (\violation) \cdot T & \wedge \\
-& \evolvessmpl{\dt{x}(t) = v(t), \dt{v}(t) = u(x(t_k),v(t_k))}{t_0,t_1,\ldots} & \\
+\Bpw (x,v) \leq (\violation) \cdot \Delta & \wedge \\
+& \evolvessmpl{\dt{x}(t) = v(t), \dt{v}(t) = u(x(t_k),v(t_k))}{\Delta} & \\
 \entails
 &
-\Always{\Bpw (x,v) \leq (\violation) \cdot T} &
+\Always{\Bpw (x,v) \leq (\violation) \cdot \Delta} &
 \end{array}
 \]
 \label{lem:barrier-piecewise-dbl-int}
@@ -630,52 +627,67 @@ predicate $P$ of Theorem~\ref{thm:barrier-smpl} with the trivial predicate
 \True.
 \end{proof}
 
-Finally, given the invariance of $\Bpw (x,v) \leq (\violation) \cdot T$
+Finally, given the invariance of $\Bpw (x,v) \leq (\violation) \cdot \Delta$
 provided by Lemma~\ref{lem:barrier-piecewise-dbl-int}, we can return to
 Theorem~\ref{thm:x-bound-dbl-int}, which establishes the invariance of $x
-\leq (\violation) \cdot T$. We restate the theorem here for convenience:
+\leq (\violation) \cdot \Delta$. We restate the theorem here for convenience:
 
-\xbounddblint*
+\begin{theorem}
+\[
+\begin{array}{clc}
+&
+\Bpw (x,v) \leq (\violation) \cdot \Delta & \wedge \\
+&
+x \leq (\violation) \cdot \Delta & \wedge \\
+&
+\evolvessmpl{\dt{x} = v, \dt{v} = u(x_k,v_k)}{\Delta} & \\
+\entails
+&
+\Always{x \leq (\violation) \cdot \Delta} &
+\end{array}
+\]
+\label{thm:x-bound-dbl-int}
+\end{theorem}
 \begin{proof}
 We apply Theorem~\ref{thm:barrier-smpl-weak} with barrier function
 \[
-\Bx (x,v) = x - (\violation)\cdot T\]
+\Bx (x,v) = x - (\violation)\cdot \Delta\]
 constant $\frac{-1}{\p}$, and state predicate
 \[
-\Bpw (x,v) \leq (\violation) \cdot T
+\Bpw (x,v) \leq (\violation) \cdot \Delta
 \]
 Simple arithmetic reasoning reveals
 that for all $x,v \in \R$,
 \begin{align}
-\nabla \Bx \dotprod [v,\ignorearg] + \frac{\Bx (x,v)}{\p} &\leq \Bpw (x,v) - (\violation)\cdot T \\
+\nabla \Bx \dotprod [v,\ignorearg] + \frac{\Bx (x,v)}{\p} &\leq \Bpw (x,v) - (\violation)\cdot \Delta \\
 &\leq 0
 \end{align}
 which satifies the premise of Theorem~\ref{thm:barrier-smpl-weak}.
 \end{proof}
 
 Theorem~\ref{thm:x-bound-dbl-int} verifies the design procedure followed by
-the ardupilot engineers -- the controller can be designed assuming that it
+the Ardupilot engineers -- the controller can be designed assuming that it
 is applied continuously and a small constant buffer can compensate for the
 approximation error. Moreover, it shows that the constraints on $u$ fall
 out naturally from the velocity bounds depicted in
 Figure~\ref{fig:sqrt-lin} by a simple application of
 Theorem~\ref{thm:barrier-smpl}.
 
-Finally, we provide conditions on $\umaxc$ to ensure that
-assumptions~\ref{ass:u_pw_bound} and~\ref{ass:u_umax_bound} are consistent
-in all states that the system can reach, i.e. all states in which $\Bpw
-(x,v) \leq (\violation) \cdot T$ and $x \leq (\violation) \cdot T$. In
-other words, for any $x$ and $v$ satisfying $\Bpw (x,v) \leq (\violation)
-\cdot T$ and $x \leq (\violation) \cdot T$, we need to ensure that there
-exists a value satisfying the upper bound from
-assumption~\ref{ass:u_pw_bound} and the lower bound $-\umax \leq u(x,v)$
-from assumption~\ref{ass:u_umax_bound}. Arithmetic reasoning reveals that
-the constraints are:
+Finally, we provide conditions on $\umaxc$ to ensure that the system never
+reaches a state $x,v$ in which $u(x,v) < -\umax$. In other words, for any
+$x$ and $v$ satisfying $\Bpw (x,v) \leq (\violation) \cdot \Delta$ and $x \leq
+(\violation) \cdot \Delta$, we need to ensure that there exists a value
+satisfying the upper bound from assumption~\ref{ass:u_pw_bound} and the
+lower bound $-\umax \leq u(x,v)$. Arithmetic reasoning reveals that the
+constraints are:
 \begin{equation}
-\umaxc \leq \frac{\umax}{1 + \frac{2T}{\p}}
+\umaxc \leq \frac{\umax}{1 + \frac{2\Delta}{\p}}
 \end{equation}
 For Ardupilot, the sample time is small relative to $\p$, so $\umaxc$ is
-close to $\umax$.
+close to $\umax$. This again verifies the design procedure followed by the
+Ardupilot engineers -- to account for error, the controller is designed
+with a conservative braking acceleration $\umaxc$ rather than the actual
+physical limit $\umax$.
 
 \section{Coq implementation}
 \label{sec:coq}
