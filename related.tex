@@ -59,11 +59,11 @@ hybrid systems) as well as an acyclic parallel composition proof rule,
 applied to compose sensor error/delay compensation modules with safety
 controllers. In addition, that work gives the first formal verification of
 a continuous induction rule (i.e. differential
-induction~\cite{Ghorbal14diffinv}). While the work of this dissertation was
-done in a different logic (LTL for Chapters~\ref{chap:memo15}
-and~\ref{chap:emsoft16} and a trajectory logic for
-Chapter~\ref{chap:exp-smpl}), we believe that all rules can be adapted to
-\dL{}. Doing so is an interested direction for future work, as it will
+induction~\cite{platzer2010logical,Platzer10DAL}). While the work of this
+dissertation was done in a different logic (LTL for
+Chapters~\ref{chap:memo15} and~\ref{chap:emsoft16} and a trajectory logic
+for Chapter~\ref{chap:exp-smpl}), we believe that all rules can be adapted
+to \dL{}. Doing so is an interested direction for future work, as it will
 allow a user to reap the benefits of the generality of \dL{} with the
 domain specific proof rules of this dissertation, all in a fully formal
 context.
@@ -204,6 +204,19 @@ composition of protectors.  In contrast, our work also supports other forms
 of composition, \textit{e.g.} disjunctive composition, and we show how
 these operators can be \emph{combined} to achieve modular verification.
 
+Our system architecture from Chapter~\ref{chap:memo15} is closely related
+to the ModelPlex framework in~\cite{mitsch2014modelplex}. This framework
+allows a user to produce provably correct runtime monitors for hybrid
+systems. These monitors check the execution of a hybrid system
+implementation for compliance to a model. If the implementation deviates
+from the model, then any safety properties with respect to that model are
+no longer guaranteed. In this case, the monitor provides a mechanism for
+switching to a fail-safe controller. ModelPlex requires that the safety of
+these fail-safe controllers be verified using other techniques. Thus, the
+work in this dissertation complements ModelPlex by providing
+domain-specific proof rules for verifying fail-safe controllers for
+sampled-data systems.
+
 Our theory from Chapter~\ref{chap:emsoft16} is closely related to the work
 on modular construction of nonblocking supervisory controllers in
 discrete-event systems~\cite{wonham1988supervisory}.  However, our
@@ -233,10 +246,10 @@ explore composing their strategy with the concrete velocity constraints
 described in Chapter~\ref{chap:exp-smpl}.
 
 \section{Inductive Methods for Continuous Systems}
-There is a long history of techniques for establishing forward
-invariance\footnote{A set $S$ is forward invariant with respect to a system
-  of differential equations if every solution starting in $S$ remains in
-  $S$.}  of systems of differential equations. One of the earliest such
+There is a long history of techniques for establishing forward invariance
+of systems of differential equations.\footnote{A set $S$ is forward
+  invariant with respect to a system of differential equations if every
+  solution starting in $S$ remains in $S$.} One of the earliest such
 techniques is known as Nagumo's viability
 theorem~\cite{aubin2009viability}. This technique relies on a notion called
 the tangent cone of a set at a point. Informally, the tangent cone of a set
@@ -266,14 +279,49 @@ automatically search for barrier certificates for a given system. Second,
 as is explored in~\cite{Ghorbal17inv}, this premise makes it challenging to
 generalize the rule to sets built using finite boolean combinations of
 polynomial inequalities. Finally, only considering the Lie derivative of
-$B$ at the boundary of the set prevents the rule from being extended to
-sampled-data systems using the approach we employ in
-Chapter~\ref{chap:exp-smpl}. For this reason, the authors
+$B$ exactly at the boundary of the set prevents the rule from being
+extended to sampled-data systems using the approach we employ in
+Chapter~\ref{chap:exp-smpl}. Because of the first reason, the authors
 of~\cite{prajna04barrier} also give a formulation of barrier certificates
-without this premise.
+without the premise $B = 0$.
+
+Platzer's differential induction~\cite{platzer2010logical,Platzer10DAL}
+provides a generalization of this weaker formulation of barrier
+certificates (without the premise $B = 0$) to finite boolean combinations
+of polynomial inequalities. The total differential operator
+from~\cite{platzer2010logical,Platzer10DAL} and the more recent rewrite
+rule-based formulation from~\cite{Platzer15substitution} provide an
+automatic mechanism for computing Lie-derivatives of finite boolean
+combinations of polynomial inequalities. This automation is very useful but
+fails to handle piecewise functions as we do in
+Chapter~\ref{chap:exp-smpl}. In addition, differential induction does not
+generalize the more powerful exponential condition-based barrier
+certificates from~\cite{kong2013barrier} that we use in
+Chapter~\ref{chap:exp-smpl}. Instead, differential induction must be
+augmented with differential auxiliaries~\cite{Platzer12diffcut} to handle
+systems that exponentially decay towards the invariant boundary. Most
+significantly, the exponential condition-based barrier certificates provide
+a natural mechanism for quantifying the invariant violation from a
+continuous-time approximation of a sampled-data system, as we do in
+Chapter~\ref{chap:exp-smpl}. It is not clear how to do this with
+differential induction, as the condition for this proof rule does not imply
+that trajectories of the system move towards the invariant region when they
+start outside (i.e. after a violation).
+
+Recent stuff on exponential barrier certificates, especially robustness paper by Tabuada and note made at the end
+
+barrier lyapunov functions
+
+Stuff by Tiwaly
+
+HHL stuff
+
+composition of barrier certificates
 
 
+The only formal implementation of any of these techniques is ...
 
 \subsection{Hybrid Systems}
+The generality of the formulations prevents them from...
 
 \section{Sampled-Data Systems}
