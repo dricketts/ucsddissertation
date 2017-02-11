@@ -228,10 +228,52 @@ is the recent geofencing strategy developed by Gurriet et
 al~\cite{gurriet16geofence}. This work places constraints on a pilot's
 desired velocity vector to avoid leaving a specified safe region. The
 strategy is complementary to the one described in this paper as it leaves
-the maximum velocity in a given direction unspecified. Future work can look
-at composing their strategy with the concrete velocity constraints
-described in this paper.
+the maximum velocity in a given direction unspecified. Future work can
+explore composing their strategy with the concrete velocity constraints
+described in Chapter~\ref{chap:exp-smpl}.
 
-\section{Inductive Methods for Hybrid Systems}
+\section{Inductive Methods for Continuous Systems}
+There is a long history of techniques for establishing forward
+invariance\footnote{A set $S$ is forward invariant with respect to a system
+  of differential equations if every solution starting in $S$ remains in
+  $S$.}  of systems of differential equations. One of the earliest such
+techniques is known as Nagumo's viability
+theorem~\cite{aubin2009viability}. This technique relies on a notion called
+the tangent cone of a set at a point. Informally, the tangent cone of a set
+$S$ at a point $x$ is the set of all vectors starting from $x$ that point
+inward towards $S$. Nagumo's viability theorem states that a closed set $S$
+is forward invariance with respect to a system of differential equations
+$\dt{\vecbold{x}} = f(\vecbold{x})$, if at all points $\vecbold{x}$ on the
+boundary of $S$, $f(\vecbold{x})$ is contained in the tangent cone of
+$\vecbold{x}$ at $S$. Such a semantic condition for invariance is powerful,
+as it applies to arbitrary closed sets. However, it is difficult to apply
+in practice without an effective way of computing the tangent cone of a
+particular closed set at a point.
 
-\section{Sampled-data Systems}
+Since Nagumo's theorem, a number of techniques have been developed that
+establish forward invariance of particular classes of
+sets. In~\cite{prajna04barrier}, the authors coined the term barrier
+certificates and showed that for a differentiable function $B$, $B \leq 0$
+is forward invariant with respect to a system of differential equations if
+the Lie derivative of $B$ along the vector field of that system is
+non-positive at $B = 0$.\footnote{The Lie derivative of $B$ along the
+  vector field $f(\vecbold{x})$ is defined by $\nabla B \dotprod f$ and
+  gives the rate of change along solutions of the system $\dt{\vecbold{x}}
+  = f(\vecbold{x})$}. The premise $B=0$ in this rule comes with a number of
+drawbacks. First, as the authors note in~\cite{prajna04barrier}, it renders
+the set of barrier certificates non-convex, making it inefficient to
+automatically search for barrier certificates for a given system. Second,
+as is explored in~\cite{Ghorbal17inv}, this premise makes it challenging to
+generalize the rule to sets built using finite boolean combinations of
+polynomial inequalities. Finally, only considering the Lie derivative of
+$B$ at the boundary of the set prevents the rule from being extended to
+sampled-data systems using the approach we employ in
+Chapter~\ref{chap:exp-smpl}. For this reason, the authors
+of~\cite{prajna04barrier} also give a formulation of barrier certificates
+without this premise.
+
+
+
+\subsection{Hybrid Systems}
+
+\section{Sampled-Data Systems}
