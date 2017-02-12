@@ -120,6 +120,22 @@ valuable to formalize these approaches and then reason about state
 constraint enforcing controllers in the presence of probability. Again, the
 expressiveness of Coq provides a promising framework for this direction.
 
-\paragraph{Other domains and more examples}
-Explore domain-specific proof rules for event-triggered systems and other domains.
-More examples
+\paragraph{More examples and other domains}
+We evaluated the sampled-data proof rules in this dissertation on various
+instantiations of a single important application: the double
+integrator. While this is a benchmark application, it would be valuable to
+evaluate the proof rules on other sampled-data systems. A promising
+starting point would be the large collection of sampled-data systems that
+have been verified in the KeYmaera and KeYmaera X proof assistants,
+e.g.~\cite{platzercruise11,platzerrobots13}. This will help build more
+evidence and understanding of when domain-specific proof rules simplify
+reasoning and reduce the proof burden for sampled-data systems.
+
+In addition, while sampled-data can be used to model many real world
+systems, there are many systems that fit outside the domain. One
+interesting example is the domain of event-triggered
+systems.\footnote{Sampled-data systems are sometimes called time-triggered
+  systems.} There is potential for domain-specific proof rules to simplify
+reasoning for this and other classes of systems. Developing these rules
+could be an important step towards making formal verification a practical
+technique for real cyber-physical systems.
