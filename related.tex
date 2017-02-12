@@ -245,7 +245,7 @@ the maximum velocity in a given direction unspecified. Future work can
 explore composing their strategy with the concrete velocity constraints
 described in Chapter~\ref{chap:exp-smpl}.
 
-\section{Inductive Methods for Continuous Systems}
+\section{Inductive Methods for Continuous and Hybrid Systems}
 There is a long history of techniques for establishing forward invariance
 of systems of differential equations.\footnote{A set $S$ is forward
   invariant with respect to a system of differential equations if every
@@ -268,11 +268,11 @@ establish forward invariance of particular classes of
 sets. In~\cite{prajna04barrier}, the authors coined the term barrier
 certificates and showed that for a differentiable function $B$, $B \leq 0$
 is forward invariant with respect to a system of differential equations if
-the Lie derivative of $B$ along the vector field of that system is
-non-positive at $B = 0$.\footnote{The Lie derivative of $B$ along the
-  vector field $f(\vecbold{x})$ is defined by $\nabla B \dotprod f$ and
-  gives the rate of change along solutions of the system $\dt{\vecbold{x}}
-  = f(\vecbold{x})$}. The premise $B=0$ in this rule comes with a number of
+the Lie derivative of $B$ along the vector field of that system is negative
+at $B = 0$.\footnote{The Lie derivative of $B$ along the vector field
+  $f(\vecbold{x})$ is defined by $\nabla B \dotprod f$ and gives the rate
+  of change along solutions of the system $\dt{\vecbold{x}} =
+  f(\vecbold{x})$}. The premise $B=0$ in this rule comes with a number of
 drawbacks. First, as the authors note in~\cite{prajna04barrier}, it renders
 the set of barrier certificates non-convex, making it inefficient to
 automatically search for barrier certificates for a given system. Second,
@@ -308,20 +308,120 @@ differential induction, as the condition for this proof rule does not imply
 that trajectories of the system move towards the invariant region when they
 start outside (i.e. after a violation).
 
-Recent stuff on exponential barrier certificates, especially robustness paper by Tabuada and note made at the end
+Recent work from the control theory community has produced rules that are
+less conservative than differential induction for inequalities (not boolean
+combinations). In~\cite{kong2013barrier}, Kong \emph{et al.} present
+exponential condition-based barrier certificates that we adapt in
+Chapter~\ref{chap:exp-smpl}. In~\cite{ames2016control} Ames \emph{et al.}
+present what they term reciprocal barrier functions. Rather than going to
+zero at the invariant boundary, these functions become unbounded at the
+invariant boundary. As noted in~\cite{xu15barrier}, this makes reciprocal
+barrier functions unsuited for verifying robust safety properties, as
+modeling error can result in a trajectory reaching a state in which the
+barrier function is undefined. Barrier Lyapunov
+functions~\cite{Tee09ctrlbarrier} suffer from the same robustness issue as
+they too grow to infinity at the invariant boundary. Our adaptation of
+barrier certificates to sampled-data systems in Chapter~\ref{chap:exp-smpl}
+can be viewed as a robustness property -- modeling error is introduced by a
+continuous time approximation of the controller. However, neither of the
+robustness notions covered in~\cite{xu15barrier} are sufficient for
+sampled-data systems as they do not address additive control disturbances.
 
-barrier lyapunov functions
+Taly and Tiwari~\cite{taly2009deductive} present a number of induction
+rules based on the Lie derivative that are complete for various classes of
+invariants. They focus on rules that are effectively computable, in
+contrast with Nagumo's theorem. However, all of their rules consider the
+Lie derivative only at the boundary of the invariant set. As
+in~\cite{prajna04barrier}, this makes them unsuited for reasoning about
+robust safety since disturbances can push the system outside the boundary
+of the invariant set. The premises of the rules in~\cite{taly2009deductive}
+express nothing about the behavior of the system after such
+violations. Similarly,~\cite{Liu11barrier} presents a necessary and
+complete rule that only considers points at the boundary of the invariant
+set. For our setting, this suffers from the same drawback
+as~\cite{taly2009deductive}.
 
-Stuff by Tiwaly
+In~\cite{Ghorbal17inv}, Ghorbal, Sogokon, and Platzer explore the relative
+deductive power of a number of the above rules for verifying positive
+invariance. They also present a mechanism for reasoning about Lie
+derivatives of piecewise functions. In contrast with our handling of
+piecewise functions in Chapter~\ref{chap:exp-smpl}, the mechanism
+from~\cite{Ghorbal17inv} can handle piecewise functions that are not
+everywhere differentiable. However, the mechanism does not apply to
+exponential condition-based barrier certificates, and thus would be
+unsuitable for sampled-data systems. Moreover, this mechanism has not been
+implemented in a formal verification framework like Coq.
 
-HHL stuff
+Very recently, Dai \emph{et al.}~\cite{Dai17revisited} have proposed a
+generalization of exponential condition-based barrier certificates
+from~\cite{kong2013barrier}. In particular, rather than showing that the
+Lie derivative of the barrier function is at most proportional to its
+value, one shows that the Lie derivative is at most a polynomial function
+of its value for an appropriately chosen polynomial. The authors present a
+family of such polynomials, for which the condition
+from~\cite{kong2013barrier} is a special case. In related work, Zeng
+\emph{et al.}~\cite{Zeng16barrier} present a formulation of barrier
+functions in which the barrier function must be a Darboux
+polynomial.\footnote{$B$ is a Darboux polynomial with respect to the vector
+  field $f(\vecbold{x})$ if $\nabla B \dotprod f = c(\vecbold{x}) \cdot
+  B(\vecbold{x})$ for some polynomial $c$}. These papers raise an
+interesting direction for future work: can such techniques be adapted to
+sampled-data systems to produce a more powerful proof rule than that in
+Chapter~\ref{chap:exp-smpl}?
 
-composition of barrier certificates
+Some of the work in this
+section~\cite{Dai17revisited,kong2013barrier,Zeng16barrier} also presents
+automation for generating polynomial inequalities satisfying their
+respective barrier function conditions. Since it is designed for continuous
+time systems, the automation from~\cite{kong2013barrier} could be applied
+directly to satisfy condition~\eqref{thm:barrier-smpl-exp} of
+Theorem~\ref{thm:barrier-smpl} in Chapter~\ref{chap:exp-smpl}. We did not
+need this automation as we were able to design a barrier function
+manually. However, this connection provides evidence for the value of
+Theorem~\ref{thm:barrier-smpl}. By decomposing the problem into an
+intersample property and a property of the continuous time approximation,
+we are able to take advantage of control theory techniques for continuous
+time. Also, our work in Chapter~\ref{chap:emsoft16} is complementary to
+this automation -- the theorems in that chapter provide a mechanism for
+decomposing problems into more manageable components to address scalability
+issues.
 
+The work in~\cite{ames2016control,xu15barrier} also gives the notion of a
+control barrier functions, a technique for synthesizing a controller from a
+barrier function. In this technique, the controller is initially left
+unspecified and later synthesized from the barrier certificate condition,
+e.g. the exponential condition from~\cite{kong2013barrier}. This is
+essentially the technique we used in building
+assumption~\ref{ass:u_pw_bound} from Chapter~\ref{chap:exp-smpl}.
 
-The only formal implementation of any of these techniques is ...
+Related to the modularity rules in Chapter~\ref{chap:emsoft16}, a recent
+paper~\cite{xu16sharing} addresses the challenge of composing two control
+barrier functions in a way that ensures a controller exists satisfying both
+conditions. This is analogous to our conjunctive composition. The key
+property is called control sharing and is related to \progress{} from
+Chapter~\ref{chap:emsoft16}. The technique from that paper only applies to
+two control barrier functions and continuous time controllers. However,
+generalizing it to an arbitrary number of controllers and combining it with
+our Theorem~\ref{thm:barrier-smpl} from Chapter~\ref{chap:exp-smpl} could
+provide an alternate technique for conjunctive composition of sampled-data
+systems.
 
-\subsection{Hybrid Systems}
-The generality of the formulations prevents them from...
+It is important to note The only formal implementation of any of the
+inductive conditions in this section is Platzer's differential induction in
+the KeYmaera X proof assistant~\cite{KeYmaeraX}. Implementing these
+conditions formally is important. As noted in~\cite{taly2009deductive},
+unsound continuous induction rules have been published and used before
+their unsoundness was discovered.
+
+Finally, some of the above approaches,
+including~\cite{prajna04barrier,kong2013barrier} also have generalizations
+to arbitrary hybrid systems to ensure that the barrier certificate changes
+value appropriately after discrete transitions of the system. While
+powerful, these rules do not allow one to verify the controller with
+respect to a continuous time approximation and separately reason about the
+error introduced by this approximation, as we do in
+Chapter~\ref{chap:exp-smpl}. Instead, the controller must explicitly take
+into account intersample behavior in order to ensure that the barrier
+certificate satisfies the appropriate condition between samples.
 
 \section{Sampled-Data Systems}
