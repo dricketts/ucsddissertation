@@ -35,6 +35,10 @@ syntactically independent variables.  Finally,
 unlike~\cite{alur1997modularity}, we present rules for disjunctive
 composition.
 
+There has also been work on hybrid automata, model checking, and other
+automation techniques specialized to sampled-data systems. We defer
+discussion of this work to Section~\ref{sec:related-sampled}.
+
 \section{Deductive logics}
 Hybrid systems have been formalized in proof assistants, including the HHL
 prover~\cite{LiuHHL10,WangHHL2015} and using Platzer's differential dynamic
@@ -433,6 +437,7 @@ into account intersample behavior in order to ensure that the barrier
 certificate satisfies the appropriate condition between samples.
 
 \section{Sampled-Data Systems}
+\label{sec:related-sampled}
 Barrier functions are part of a general class of functions called storage
 functions~\cite{Willems1972} that are used to reason about dynamical
 systems by assigning a scalar value to each state and analyzing how the
@@ -474,12 +479,14 @@ in~\cite{prajna05delay} is not as general as~\cite{Fridman04delay} and
 crucially cannot express systems with discontinuous delay, which is
 necessary for sampled-data systems.
 
-In~\cite{mitchell2015improved,mitchell2013safety}, Mitchell \emph{et al.}
-present algorithms for computing the discriminating kernel of a
-sampled-data systems for an invariant set. The discriminating kernel
-characterizes the set of initial states of the system for which there
-exists a control law that keeps all trajectories inside the invariant set.
-The algorithm in~\cite{mitchell2015improved} only computes the
+There has also been work on algorithms for computing the discriminating
+kernel\footnote{The discriminating kernel is sometimes known as the
+  viability kernel.} of a sampled-data systems for an invariant
+set~\cite{mitchell2015improved,mitchell2013safety,Gillula14sampled}. The
+discriminating kernel characterizes the set of initial states of the system
+for which there exists a control law that keeps all trajectories inside the
+invariant set.  The algorithms
+in~\cite{mitchell2015improved,Gillula14sampled} only compute the
 discriminating kernel for a finite time horizon and thus provides a weaker
 guarantee than the infinite horizon safety guarantees in this
 dissertation. The algorithm in~\cite{mitchell2013safety} can, in certain
@@ -490,3 +497,25 @@ soundness of the algorithms from these papers in a proof assistant would be
 challenging, as they do not produce a witness that can be efficiently
 checked for correctness, as in the case of algorithms for generating
 barrier certificates~\cite{Dai17revisited,kong2013barrier,Zeng16barrier}.
+
+Model checking has also been employed specifically for sampled-data
+systems. In~\cite{silva01sampled}, Silva and Krogh present sampled-data
+hybrid automata -- the specialized model permits a more efficient model
+checking algorithm using the \emph{CheckMate} model
+checker~\cite{silva2000modeling} than general purpose hybrid system model
+checkers. However, the model checker can only guarantee safety over a
+finite time horizon. Similarly, in~\cite{simko14bmc}, Simko and Jackson
+present a model checking algorithm for sampled-data systems that is based
+on Taylor models of the continuous dynamics and SMT solvers rather than
+automata. Their algorithm also only guarantees safety over a finite time
+horizon.
+
+An alternate approach for verifying safety of sampled-data systems was
+explored in~\cite{Zutshi12sampled} based on timed relational
+abstractions. In this approach, automation constructs relations that map
+the state of the system at a sample time to the state of the system at the
+next sample time. However, this model assumes that the inter sample time is
+fixed rather than bounded and more importantly, only verifies properties of
+states exactly at the sample times. An additional mechanism would be needed
+to verify properties of states between samples.
+
