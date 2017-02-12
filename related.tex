@@ -461,15 +461,20 @@ same approach as Theorem~\ref{thm:barrier-smpl} in
 Chapter~\ref{chap:exp-smpl}. The framework in~\cite{laila02sampled} is far
 more general than our model in Chapter~\ref{chap:exp-smpl}, as it handles
 disturbances, controllers that maintain state, etc. However, the theorems
-in ~\cite{laila02sampled}, when specialized to exponential condition-based
+in~\cite{laila02sampled}, when specialized to exponential condition-based
 barrier certificates and our less general model of sampled-data systems,
 apply only to states bounded by some constant magnitude. This restriction
 is not required by Theorem~\ref{thm:barrier-smpl}. Moreover, none of the
 work in~\cite{laila02sampled} has been formalized in a proof assistant like
-Coq. Nevertheless, real systems often permit conservative constant bounds
-on the magnitude of the state, and it would be interesting to formalize the
-framework of~\cite{laila02sampled} in Coq to determine how the violation
-bounds compare to those of Theorem~\ref{thm:barrier-smpl}.
+Coq. Finally, the theorems in~\cite{laila02sampled} only give deviation
+bounds of dissipation inequalities over a single sampling period, while
+Theorem~\ref{thm:barrier-smpl} quantifies how much the deviation over a
+single sampling period affects the invariant violation over an infinite
+time horizon. Nevertheless, real systems often permit conservative constant
+bounds on the magnitude of the state, and it would be interesting to
+formalize the framework of~\cite{laila02sampled} in Coq and extend it to
+infinite time horizons to determine how the violation bounds compare to
+those of Theorem~\ref{thm:barrier-smpl}.
 
 Some work analyzes sampled-data systems by treating them as time-delay
 systems~\cite{Fridman04delay}.  Prajna \emph{et al.} adapted their barrier
