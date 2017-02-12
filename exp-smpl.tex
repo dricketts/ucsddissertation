@@ -55,13 +55,13 @@ Ardupilot.
 
 Second, control systems are often designed under the assumption that
 controllers run continuously, while the actual implementation is a
-sampled-data system, the topic of this disseration. That is, the digitial
-controller runs periodically rather than continuously. System designers can
-compensate for this (and other) approximations by adding a safety
-``buffer'' to the system. For example, the Ardupilot controller we helped
-build stops the vehicle 1 meter prior to the actual safety boundary. In
-order to reason about whether such a buffer is sufficient for a given
-system, we augmented the new barrier certificate proof rule
+sampled-data system. In control theory, this process is known as
+emulation~\cite{laila02sampled}. System designers can compensate for this
+(and other) approximations by adding a safety ``buffer'' to the system. For
+example, the Ardupilot controller we helped build stops the vehicle 1 meter
+prior to the actual safety boundary. In order to reason about whether such
+a buffer is sufficient for a given system, we augmented the new barrier
+certificate proof rule
 from~\cite{kong2013barrier,xu15barrier,nguyen16barrier} to bound the error
 introduced by a continuous time approximation of a sampled-data
 system. This rule allows one to perform the majority of reasoning in a
@@ -127,9 +127,9 @@ state-dependent upper bounds on the control signal (acceleration). The
 actual control law implementation takes the minimum of these constraints
 and the pilot's desired acceleration. Crucially, we derive these
 constraints using our barrier certificate theorem for sampled-data systems,
-which allows us to derive the constraints assuming a continuous controller,
-and transfer these results to the sampled-data model by proving two simple
-side-conditions on the intersample system behavior.
+which allows us to derive the constraints assuming a continuous time
+controller, and transfer these results to the sampled-data model by proving
+two simple side-conditions on the intersample system behavior.
 
 Section~\ref{sec:model} presents the formal logic we use to reason about
 sampled-data systems and gives a double integrator model of the geofence

@@ -265,14 +265,14 @@ particular closed set at a point.
 
 Since Nagumo's theorem, a number of techniques have been developed that
 establish forward invariance of particular classes of
-sets. In~\cite{prajna04barrier}, the authors coined the term barrier
-certificates and showed that for a differentiable function $B$, $B \leq 0$
-is forward invariant with respect to a system of differential equations if
-the Lie derivative of $B$ along the vector field of that system is negative
-at $B = 0$.\footnote{The Lie derivative of $B$ along the vector field
-  $f(\vecbold{x})$ is defined by $\nabla B \dotprod f$ and gives the rate
-  of change along solutions of the system $\dt{\vecbold{x}} =
-  f(\vecbold{x})$}. The premise $B=0$ in this rule comes with a number of
+sets. In~\cite{prajna04barrier}, Prajna \emph{et al.} coined the term
+barrier certificates and showed that for a differentiable function $B$, $B
+\leq 0$ is forward invariant with respect to a system of differential
+equations if the Lie derivative of $B$ along the vector field of that
+system is negative at $B = 0$.\footnote{The Lie derivative of $B$ along the
+  vector field $f(\vecbold{x})$ is defined by $\nabla B \dotprod f$ and
+  gives the rate of change along solutions of the system $\dt{\vecbold{x}}
+  = f(\vecbold{x})$}. The premise $B=0$ in this rule comes with a number of
 drawbacks. First, as the authors note in~\cite{prajna04barrier}, it renders
 the set of barrier certificates non-convex, making it inefficient to
 automatically search for barrier certificates for a given system. Second,
@@ -387,7 +387,7 @@ decomposing problems into more manageable components to address scalability
 issues.
 
 The work in~\cite{ames2016control,xu15barrier} also gives the notion of a
-control barrier functions, a technique for synthesizing a controller from a
+control barrier function, a technique for synthesizing a controller from a
 barrier function. In this technique, the controller is initially left
 unspecified and later synthesized from the barrier certificate condition,
 e.g. the exponential condition from~\cite{kong2013barrier}. This is
@@ -406,15 +406,23 @@ our Theorem~\ref{thm:barrier-smpl} from Chapter~\ref{chap:exp-smpl} could
 provide an alternate technique for conjunctive composition of sampled-data
 systems.
 
-It is important to note The only formal implementation of any of the
+Sloth \emph{et al.}\cite{Sloth12composition} also present a mechanism for
+compositional verification of continuous time systems using barrier
+certificates. In addition to focusing on continuous time systems rather
+than sampled-data systems, this work differs from parallel composition in
+Chapter~\ref{chap:emsoft16} by considering systems whose components
+interact via interconnection inputs rather than by sharing a single control
+input that must satisfy a composition of inequalities.
+
+It is important to note that the only formal implementation of any of the
 inductive conditions in this section is Platzer's differential induction in
 the KeYmaera X proof assistant~\cite{KeYmaeraX}. Implementing these
 conditions formally is important. As noted in~\cite{taly2009deductive},
 unsound continuous induction rules have been published and used before
 their unsoundness was discovered.
 
-Finally, some of the above approaches,
-including~\cite{prajna04barrier,kong2013barrier} also have generalizations
+Finally, some of the above
+approaches~\cite{prajna04barrier,kong2013barrier} also have generalizations
 to arbitrary hybrid systems to ensure that the barrier certificate changes
 value appropriately after discrete transitions of the system. While
 powerful, these rules do not allow one to verify the controller with
@@ -425,3 +433,60 @@ into account intersample behavior in order to ensure that the barrier
 certificate satisfies the appropriate condition between samples.
 
 \section{Sampled-Data Systems}
+Barrier functions are part of a general class of functions called storage
+functions~\cite{Willems1972} that are used to reason about dynamical
+systems by assigning a scalar value to each state and analyzing how the
+value of the functions dissipates along trajectories of the system.  There
+has been a variety of work on storage function approaches for reasoning
+about sampled-data systems.  Much of this work,
+including~\cite{chen1991input,seuret13sampled}, focuses on stability of
+sampled-data systems using Lyapunov or Lyapunov-like functions, which is an
+important but orthogonal concern. The most relevant to this dissertation is
+the work by Laila, Nešić, and Teel~\cite{laila02sampled} on a general
+framework for analyzing the behavior of dissipation inequalities for
+sampled-data systems. The exponential condition-based barrier functions
+from~\cite{kong2013barrier}, which we adapt in Chapter~\ref{chap:exp-smpl},
+are a particular type of dissipation inequality. The framework
+in~\cite{laila02sampled} applies to controllers that are designed using
+emulation: the controller is designed with respect to a continuous time
+appoximation of the system and the implemented digitally in a sampled-data
+system. The authors then provide a series of theorems that quantify the
+effect of emulation on dissipation inequalities. This is essentially the
+same approach as Theorem~\ref{thm:barrier-smpl} in
+Chapter~\ref{chap:exp-smpl}. The framework in~\cite{laila02sampled} is far
+more general than our model in Chapter~\ref{chap:exp-smpl}, as it handles
+disturbances, controllers that maintain state, etc. However, the theorems
+in ~\cite{laila02sampled}, when specialized to exponential condition-based
+barrier certificates and our less general model of sampled-data systems,
+apply only to states bounded by some constant magnitude. This restriction
+is not required by Theorem~\ref{thm:barrier-smpl}. Moreover, none of the
+work in~\cite{laila02sampled} has been formalized in a proof assistant like
+Coq. Nevertheless, real systems often permit conservative constant bounds
+on the magnitude of the state, and it would be interesting to formalize the
+framework of~\cite{laila02sampled} in Coq to determine how the violation
+bounds compare to those of Theorem~\ref{thm:barrier-smpl}.
+
+Some work analyzes sampled-data systems by treating them as time-delay
+systems~\cite{Fridman04delay}.  Prajna \emph{et al.} adapted their barrier
+certificate formulation to time delay
+systems~\cite{prajna05delay}. However, the model of time delay systems
+in~\cite{prajna05delay} is not as general as~\cite{Fridman04delay} and
+crucially cannot express systems with discontinuous delay, which is
+necessary for sampled-data systems.
+
+In~\cite{mitchell2015improved,mitchell2013safety}, Mitchell \emph{et al.}
+present algorithms for computing the discriminating kernel of a
+sampled-data systems for an invariant set. The discriminating kernel
+characterizes the set of initial states of the system for which there
+exists a control law that keeps all trajectories inside the invariant set.
+The algorithm in~\cite{mitchell2015improved} only computes the
+discriminating kernel for a finite time horizon and thus provides a weaker
+guarantee than the infinite horizon safety guarantees in this
+dissertation. The algorithm in~\cite{mitchell2013safety} can, in certain
+cases reach a fixed point thus guaranteeing safety over an infinite time
+horizon. However, there are no characterization of the class of systems for
+which such a fixed point will be reached. In addition, formalizing
+soundness of the algorithms from these papers in a proof assistant would be
+challenging, as they do not produce a witness that can be efficiently
+checked for correctness, as in the case of algorithms for generating
+barrier certificates~\cite{Dai17revisited,kong2013barrier,Zeng16barrier}.
