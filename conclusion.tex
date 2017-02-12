@@ -1,0 +1,125 @@
+We have presented a series of proof rules for safety verification of
+sampled-data systems and evaluated them on various versions of the
+sampled-data double integrator, an important benchmark in control
+theory. Chapter~\ref{chap:memo15} gave rules for discrete induction
+specialized to sampled-data systems and acyclic composition of
+components. Chapter~\ref{chap:emsoft16} described a general framework for
+building sampled-data systems using conjunction (parallel composition),
+disjunction (alternative composition), and substitution (reuse). Finally
+Chapter~\ref{chap:exp-smpl} revisited an atomic building block from
+previous chapters, using a better performing but more complex position
+bounding controller to motivate a stronger continuous induction theorem for
+sampled-data systems.
+
+All of the work described in this dissertation was done in the expressive
+and foundational context of the Coq proof assistant. This expressiveness
+was essential, as it allowed us to add domain-specific reasoning techniques
+as theorems and dispatch side conditions using formal proofs, rather than
+using axioms or tactics and dispatching side conditions using unverified
+decision procedures. In summary, the work described in this document was in
+support of the following:
+
+\thesis
+
+There are a number of exciting future research directions for this work. In
+the rest of this section, we discuss some of these directions.
+
+\paragraph{Horizontal composition}
+Chapter~\ref{chap:emsoft16} explored composition of sampled-data systems,
+particularly those controlling overlapping sets of actuators. However, the
+proof rules of Chapter~\ref{chap:emsoft16} were only evaluated on the
+simpler but poorer performing atomic position (height) controller from
+Chapter~\ref{chap:memo15}, not on the more complex but better performing
+position controller from Chapter~\ref{chap:exp-smpl}. It would be valuable
+to explore composition and re-use of the more complex controller from
+Chapter~\ref{chap:exp-smpl}, as this would be an important step towards
+verification of the full Ardupilot geofencing module. An promising approach
+is to combined ideas from~\cite{xu16sharing}, which explores composition of
+barrier certificates for continuous time systems, with theorems from
+Chapter~\ref{chap:exp-smpl}, which explore barrier certificates for
+sampled-data systems. This might address a particular shortcoming in
+Chapter~\ref{chap:emsoft16}: the composition proof rules did not leverage
+any of the differential invariants/barrier certificates used to verify
+subcomponents.
+
+\paragraph{Vertical composition}
+In Section~\ref{sec:exp-smpl-overview}, we described how the real
+implementation of the Ardupilot controller does not directly set
+acceleration but instead outputs desired velocity commands to an inner loop
+velocity controller. To simplify reasoning the outer loop controller was
+designed under the approximation that the inner loop controller
+instantaneously achieves any desired velocity command. The informal
+justification for this approximation is that, as long as the velocity
+commands do not change too quickly, the velocity dynamics are sufficiently
+fast relative to position dynamics that the approximation error will not
+cause significant violations of position constraints. It would be valuable
+to formalize this argument: under what conditions can the position
+constraint-enforcing outer loop controller be vertically composed with the
+inner loop velocity controller, and how much constraint violation does this
+cause?
+
+Answering this question will require determining what properties the inner
+loop velocity controller must satisfy. The informal argument is based on
+the velocity dynamics being sufficiently fast -- this suggests that the
+inner loop controller must satisfy a fast convergence property, such as
+local exponential stability. It would be valuable to verify such a property
+in the same formal framework as this dissertation, suggesting that the Coq
+framework needs to be extended with rules for reasoning about stability
+properties from control theory, particularly for sampled-data systems.
+Another promising approach is to explore the use of reference
+governors~\cite{bemporad98reference}, a concept from control theory in an
+inner loop controller is augmented with a module (the reference governor)
+that modifies commands (references) to the controller in order to guarantee
+desired state constraints.
+
+\paragraph{Verified implementations}
+All of the systems verified in this dissertation have contained high-level
+models of controllers rather than executable code. Our own experience has
+demonstrated that bugs can occur at all levels of the development process,
+not just in the high-level design. Based on the ideas in
+Chapter~\ref{chap:exp-smpl}, we implemented a geofence module for Ardupilot
+that prevents a vehicle from leaving a specified safe area, regardless of
+what the pilot does. This important safety feature required extending the
+one-spatial dimension constraints from Chapter~\ref{chap:exp-smpl} to an
+arbitrary 2D polygon and to a circular fence. At the core of this
+implementation is a constraint solver that chooses a safe velocity as close
+as possible to the pilot's command while satisfying the constraints of each
+edge of the fence (or circle). Our original C++ implementation passed the
+review process of the Ardupilot developers, was merged into the
+development, and run in the current public release of
+Ardupilot. Unfortunately, we later discovered that the constraint solving
+implementation is incorrect.\footnote{The bug is documented in the
+  following github issues:
+  \url{https://github.com/ArduPilot/ardupilot/issues/4429} and
+  \url{https://github.com/ArduPilot/ardupilot/issues/4807}.}
+
+This experience suggests that it is valuable to have end-to-end formal
+verification results, from the high level design all the way to the low
+level implementation. Coq is well suited for this task, as it is expressive
+enough for both the high level models (as demonstrated in this
+dissertation) as well as executable code
+verification~\cite{leroy2009compcert,appel2014vst}, even including floating
+point arithmetic~\cite{flocq11}. Such an end-to-end verification result
+would be challenging for a standalone hybrid system verification tool as it
+would need to interface with another tool for formalizing and reasoning
+about code. We expect that a shallow encoding of a hybrid system logic in
+Coq will facilitate this task, as it will ease the process of integrating
+with other Coq developments for reasoning about low level code, such
+as~\cite{appel2014vst,flocq11}.
+
+\paragraph{Probability}
+All controllers in this dissertation require an estimate of the state of
+the system. Since sensors are not perfect, these estimates are inherently
+probabilistic. In Chapter~\ref{chap:memo15}, we presented an approach to
+reason about systems in the presence of sensor error when there is a
+concrete bound on that error. However, this can be overly pessimistic in
+certain cases and inaccurate in others. The core sensor fusion algorithms
+used to estimate a system's state based on sensor readings (e.g. Kalman
+filters) are based on probability~\cite{Simon06estimation}. It would be
+valuable to formalize these approaches and then reason about state
+constraint enforcing controllers in the presence of probability. Again, the
+expressiveness of Coq provides a promising framework for this direction.
+
+\paragraph{Other domains and more examples}
+Explore domain-specific proof rules for event-triggered systems and other domains.
+More examples

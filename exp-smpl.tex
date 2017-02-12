@@ -746,14 +746,14 @@ framework for hybrid systems that can handle piecewise functions.
 
 \subsection{Logics in Coq}
 %TODO should we talk about benefit of shallow encoding?
-We implemented our trajectory logic using Charge!~\cite{???}, a framework
-for easily defining and reasoning about logics within Coq. Charge! allows a
-us to declare that a particular type forms a logic by proving that a small
-set of axioms hold for that type. In our case, these axioms are proved
-automatically. In return, we automatically get standard logical operators
-such as conjunction, disjunction, and implication lifted into the
-logic. For example, in Section~\ref{sec:proof}, we frequently wrote
-formulas like $P \wedge Q$ where $P$ and $Q$ are trajectory
+We implemented our trajectory logic using Charge!~\cite{chargecoregit}, a
+framework for easily defining and reasoning about logics within
+Coq. Charge! allows a us to declare that a particular type forms a logic by
+proving that a small set of axioms hold for that type. In our case, these
+axioms are proved automatically. In return, we automatically get standard
+logical operators such as conjunction, disjunction, and implication lifted
+into the logic. For example, in Section~\ref{sec:proof}, we frequently
+wrote formulas like $P \wedge Q$ where $P$ and $Q$ are trajectory
 predicates. Without Charge!, we would have to define what it means to
 conjoin two trajectory predicates. With Charge!, we get this for free.
 
