@@ -1,11 +1,11 @@
 This chapter presents two proof rules for reasoning about sampled-data
-systems. The first rule is an induction rule specialized to sampled-data
-systems. This rule decomposes an inductive safety proof into a proof about
-the initial state, a proof about the discrete transition, and a proof about
-the continuous transition. For each of the transitions, the proof rule
-introduces timing constraints that are guaranteed by the periodic
-sampled-data model. Such a rule automatically manages the aspects of an
-inductive safety proof that are common to all periodic sampled-data
+systems. The first rule is a discrete induction rule specialized to
+sampled-data systems. This rule decomposes an inductive safety proof into a
+proof about the initial state, a proof about the discrete transition, and a
+proof about the continuous transition. For each of the transitions, the
+proof rule introduces timing constraints that are guaranteed by the
+periodic sampled-data model. Such a rule automatically manages the aspects
+of an inductive safety proof that are common to all periodic sampled-data
 systems, allowing the user to focus on the application specific aspects of
 the proof. Without such a proof rule, this tedious decomposition would have
 to be done manually.

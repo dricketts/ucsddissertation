@@ -1089,7 +1089,7 @@ expressiveness, (3) flight behavior, and (4) comparison to fully automated
 tools.
 
 \subsection{Proof Effort}
-Figure~\ref{fig:monitors} lists all of the geo-fencing controllers that we
+Table~\ref{fig:monitors} lists all of the geo-fencing controllers that we
 verified and flew, along with the composition mechanism, proof size, and
 number of symbols in the discrete transition for each one.  The first 2
 rows list controllers that we ported from prior work; these are our atomic
@@ -1098,7 +1098,7 @@ verified using a combination of substitution and conjunction.  The
 remaining rows list controllers that we built using disjunction and
 substitution.
 
-\begin{figure}
+\begin{table}
 \begin{tabular}{l|l|r|r}
 id: Name & Built How? & \# of Symbols & Lines of Proof \\
 \hline 
@@ -1113,14 +1113,14 @@ h: 3D pilot box & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disj
 \end{tabular}
 \caption{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
 \label{fig:monitors}
-\end{figure}
+\end{table}
 
-Note that our 1D position controller ($b$ in Figure~\ref{fig:monitors})
+Note that our 1D position controller ($b$ in Table~\ref{fig:monitors})
 involves 3 variables and 126 symbols and is a relatively simple discrete
 transition requiring only multiplication and addition.  However, verifying
 this position controller required substantial, tedious, manual proof effort
 because of the difficulty of reasoning about nonlinear real arithmetic.  On
-the other hand, our 3D cube controller ($e$ in Figure~\ref{fig:monitors})
+the other hand, our 3D cube controller ($e$ in Table~\ref{fig:monitors})
 contains 9 variables, 1353 symbols, trigonometric functions, and angular
 constraints.  This increase in complexity is actually quite daunting for
 two reasons: (1) arithmetic decision procedures have very bad worst case
@@ -1223,7 +1223,7 @@ preserved.
 \end{figure}
 
 We flew our quadcopter with all controllers listed in
-Figure~\ref{fig:monitors}.  All of the controllers enforced their
+Table~\ref{fig:monitors}.  All of the controllers enforced their
 respective bounds with only minor violations, which can be attributed to
 un-modeled forces such as wind and to modeling approximations.
 
