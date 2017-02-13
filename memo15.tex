@@ -29,7 +29,7 @@ on a actual quadcopter and performed flight tests. Doing so forced us to
 confront an important issue. Since our controllers are components of a much
 larger system containing numerous controllers, how do we architect the
 autopilot to incorporate our controllers, while still maintaining our
-safety guarantees? Throughout the paper, we describe our solution and
+safety guarantees? Throughout the chapter, we describe our solution and
 discuss engineering tradeoffs. We also discuss discrepancies between our
 model and reality as well as lessons learned from doing foundational
 verification of sampled-data systems.
@@ -567,7 +567,7 @@ obligations are substantially more intricate.  In practice, this means that
 the existing foundational, nonlinear real arithmetic decision procedure is
 not able to solve all of the goals, even though the unverified SMT solver
 Z3~\cite{demoura2008z3} solves all goals quickly.  Second, the verification
-used history variables (omitted from the specification in this paper for
+used history variables (omitted from the specification in this chapter for
 simplicity) to record the value of each physical variable in the last
 discrete transition.  We use these values to describe the safety buffer
 that the system consumes during the continuous transition.  These variables

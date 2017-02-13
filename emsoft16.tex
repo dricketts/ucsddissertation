@@ -406,7 +406,7 @@ stop before the boundary.
 \[\begin{array}{rl}
 D_\partial \triangleq & \Ca\tlaprime \wedge (\tlanextvar{a} \cdot \Delta + \tlavar{v} \leq ub \vee \tlanextvar{a} \leq 0) \\
 \invShimv \triangleq & (\tlavar{a} < 0 \rightarrow \tlavar{v} \leq ub) \wedge
-(\tlavar{a} \geq 0 \rightarrow \tlavar{a} \cdot \tlavar{\tau} + \tlavar{v} \leq ub) \\
+(\tlavar{a} \geq 0 \rightarrow \tlavar{a} \cdot \Time + \tlavar{v} \leq ub) \\
 \end{array}
 \]
 
@@ -417,7 +417,7 @@ D_{\partial^2} \triangleq & (0 \leq \tlavar{v} + \tlanextvar{a} \cdot \Delta \ri
 & \;\quad \tdist{\tlavar{v}}{\tlanextvar{a}}{\Delta} + \sdist{\tlavar{v} + \tlanextvar{a}\cdot\Delta} + \tlavar{y} \leq \ubY) \\
 & (\tlavar{v} + \tlanextvar{a} \cdot \Delta \leq 0 \wedge 0 < \tlavar{v} \rightarrow \\
 & \;\quad \tdist{\tlavar{v}}{\tlanextvar{a}}{\frac{-\tlavar{v}}{\tlanextvar{a}}} + \tlavar{y} \leq \ubY) \wedge \Ca\tlaprime \\
-\invShimx \triangleq & \forall t : \mathbb{R}, 0 \leq t \leq \tlavar{\tau} \rightarrow \\
+\invShimx \triangleq & \forall t : \mathbb{R}, 0 \leq t \leq \Time \rightarrow \\
 & \;\quad \tlavar{\Y} {+} \tdist{\tlavar{\V}}{\tlavar{a}}{t} + \sdist {\max(0,\tlavar{\V} + \tlavar{a} \cdot t)} \leq \ubY
 \end{array}
 \]
