@@ -2,13 +2,16 @@ In this chapter, we return to a controller that prevents a vehicle from
 violating a boundary in one spatial dimension. Controllers with this
 objective were described in Chapters~\ref{chap:memo15}
 and~\ref{chap:emsoft16}. However, as described in Section~\ref{sec:flight}
-of Chapter~\ref{chap:emsoft16}, those controllers exhibit significant
-oscillation near the boundary due to a discontinuity in the value output by
-the controllers. This oscillation is undesirable from the perspective of
-the pilot. More significantly, it is physically impossible to change
-control signal discontinuously, so the actual implementation deviates from
-the model at the boundary, partially causing the boundary violations that
-we experienced in actual flight tests.
+of Chapter~\ref{chap:emsoft16}, vehicles running those controllers exhibit
+significant oscillation near the boundary due to a discontinuity in the
+value output by the controllers. This oscillation, known as chattering in
+control theory~\cite{utkin06chatter}, occurs in practice in the presence of
+discontinuous control because of a combination of unmodeled dynamics and
+sampled-data implementation. The oscillation is undesirable from the
+perspective of the pilot. More significantly, it results in a discrepancy
+at the boundary between the position dynamics in the model and the position
+dynamics in reality, partially causing the boundary violations that we
+experienced in actual flight tests.
 
 Our goal was to build a controller whose behavior at the boundaries was
 acceptable for the popular open source UAV autopilot called
@@ -133,12 +136,12 @@ two simple side-conditions on the intersample system behavior.
 
 Section~\ref{sec:model} presents the formal logic we use to reason about
 sampled-data systems and gives a double integrator model of the geofence
-within this logic. Section~\ref{sec:proof} provides formal details on
-barrier certificates for sampled-data systems and shows how to apply them
-to reason about the geofence. Section~\ref{sec:coq} describes the Coq
-implementation of our results with Section~\ref{sec:differentiation}
-describing how we extend formal verification using barrier certificate to
-piecewise functions.
+within this logic. Section~\ref{sec:proof-barrier} provides formal details
+on barrier certificates for sampled-data systems and
+Section~\ref{sec:proof-geofence} shows how to apply them to reason about
+the geofence. Section~\ref{sec:coq} describes the Coq implementation of our
+results with Section~\ref{sec:differentiation} describing how we extend
+formal verification using barrier certificate to piecewise functions.
 
 \section{Logic}
 \label{sec:model}
@@ -705,9 +708,9 @@ sampled-data systems.
 
 \subsection{Differentiation}
 \label{sec:differentiation}
-In Section~\ref{sec:proof}, we glossed over the formal details of verifying
-the gradient of a barrier function. Working in an expressive proof
-assistant like Coq allows us to verify this step as well, even for
+In Section~\ref{sec:proof-geofence}, we glossed over the formal details of
+verifying the gradient of a barrier function. Working in an expressive
+proof assistant like Coq allows us to verify this step as well, even for
 piecewise functions. That is, we can formally prove the validity of
 equations like~\eqref{eq:dbarrier-piecewise-dbl-int} using
 Lemma~\ref{lem:pw-deriv}:
@@ -752,10 +755,11 @@ Coq. Charge! allows a us to declare that a particular type forms a logic by
 proving that a small set of axioms hold for that type. In our case, these
 axioms are proved automatically. In return, we automatically get standard
 logical operators such as conjunction, disjunction, and implication lifted
-into the logic. For example, in Section~\ref{sec:proof}, we frequently
-wrote formulas like $P \wedge Q$ where $P$ and $Q$ are trajectory
-predicates. Without Charge!, we would have to define what it means to
-conjoin two trajectory predicates. With Charge!, we get this for free.
+into the logic. For example, in Section~\ref{sec:proof-barrier}, we
+frequently wrote formulas like $P \wedge Q$ where $P$ and $Q$ are
+trajectory predicates. Without Charge!, we would have to define what it
+means to conjoin two trajectory predicates. With Charge!, we get this for
+free.
 
 Along with the normal logic definitions, Charge! also automatically
 provides standard logical proof rules like commutativity of conjunction and

@@ -35,6 +35,7 @@ model and reality as well as lessons learned from doing foundational
 verification of sampled-data systems.
 
 \section{Overview}
+\label{sec:memo-overview}
 We start by giving an overview of how our running controller examples fit
 into the architecture of a quadcopter's autopilot. We would like our two
 controllers to ensure that a quadcopter does not exceed some maximum
@@ -71,7 +72,7 @@ to focus our verification effort on our safety critical controllers,
 without needing to reason about complex existing controllers.  This design
 makes the verification tractable, while retaining the benefits of
 state-of-the art controllers. We discuss this architecture in more detail
-in Section~\ref{sec:arch}.
+in Section~\ref{sec:discrete-model}.
 
 \begin{figure}[t]
 \centering
@@ -211,9 +212,10 @@ that it will still be at most \ub{} when the controller first runs (which
 will be at most $\Delta$ time units away).  For now, we do not specify how
 the value of $\Vmax$ is produced; that is, $\Vmax$ does not appear in any
 action formulas (transitions).  Instead, we simply assume that such a value
-is provided to the controller.  In Section~\ref{sec:compose}, we will show
-how to specify systems that produce a $\Vmax$ satisfying this assumption
-and we will show how to compose them with the velocity controller.
+is provided to the controller.  In Section~\ref{sec:memo15-composition}, we
+will show how to specify systems that produce a $\Vmax$ satisfying this
+assumption and we will show how to compose them with the velocity
+controller.
 
 \subsection{Proof}
 We now show how we prove the above LTL formula in Coq.  To do so, we need
@@ -631,12 +633,12 @@ capture the direction of thrust.  However, a model that includes attitude
 is a refinement of the world model that our specifications use.  This means
 that all traces allowed by a model including attitude are also allowed by
 the world model used in our specifications.  As we explained in
-Section~\ref{sec:sys}, this is because our specifications model the world
-using differential \emph{inequalities} stating that the vertical thrust is
-upper-bounded by the thrust produced by the motors.  This relaxation of the
-specification means that we must prove properties of a more liberal system,
-but it allows us to use our results in the more constrained, richer model
-which includes attitude.
+Section~\ref{sec:memo15-model}, this is because our specifications model
+the world using differential \emph{inequalities} stating that the vertical
+thrust is upper-bounded by the thrust produced by the motors.  This
+relaxation of the specification means that we must prove properties of a
+more liberal system, but it allows us to use our results in the more
+constrained, richer model which includes attitude.
 
 The other discrepancies between our model and the real world are common
 simplifying assumptions of models for verification purposes.  For example,
@@ -651,11 +653,11 @@ formal discrepancy.
 \subsection{From Relations to Bits}
 \label{sec:discrete-model}
 
-Our description of the autpilot architecture in Section~\ref{sec:example}
-describes the verified controller as the last piece of code that runs
-before signals are sent to the motors.  This is not strictly necessary.
-There are advantages and disadvantages to running the verified controller
-at different points.
+Our description of the autpilot architecture in
+Section~\ref{sec:memo-overview} describes the verified controller as the
+last piece of code that runs before signals are sent to the motors.  This
+is not strictly necessary.  There are advantages and disadvantages to
+running the verified controller at different points.
 
 
 \begin{figure}[t]
@@ -933,7 +935,7 @@ wide range of interesting theories.  We have leveraged the standard
 library's real analysis theories to reason about real arithmetic and
 calculus.  Future work can also make formal connections with actual
 controller implementations, as the semantics of C~\cite{leroy2009compcert}
-and floating point arithmetic~\cite{floqc11} are expressible. Furthermore,
+and floating point arithmetic~\cite{flocq11} are expressible. Furthermore,
 as this dissertation emphasizes and future chapters reiterate, using Coq
 allows us to use powerful, domain specific proof rules without sacrificing
 soundness. In general, the full power of Coq's rich logic and all of the

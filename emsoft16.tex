@@ -1172,7 +1172,7 @@ physical dynamics.
 To make sure that our controllers work well in practice, we manually
 translated our models to C and ran them on a 3DR Iris+ quadcopter.  This
 allows us to evaluate the accuracy of our approximations.
-Figure~\ref{fig:arch} depicts the architecture of the system with one of
+Figure~\ref{fig:emsoft-arch} depicts the architecture of the system with one of
 our controllers inserted.  Our controllers check the outputs of the
 pre-existing control software, potentially replacing them with default safe
 values; this resolves the non-determinism of the controller specifications.
@@ -1219,7 +1219,7 @@ preserved.
   \end{tikzpicture}
 
      \caption{System architecture.}
-     \label{fig:arch}
+     \label{fig:emsoft-arch}
 \end{figure}
 
 We flew our quadcopter with all controllers listed in
