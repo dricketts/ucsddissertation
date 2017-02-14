@@ -30,7 +30,7 @@ confront an important issue. Since our controllers are components of a much
 larger system containing numerous controllers, how do we architect the
 autopilot to incorporate our controllers, while still maintaining our
 safety guarantees? Throughout the chapter, we describe our solution and
-discuss engineering tradeoffs. We also discuss discrepancies between our
+discuss engineering trade-offs. We also discuss discrepancies between our
 model and reality as well as lessons learned from doing foundational
 verification of sampled-data systems. All results in this chapter were
 implemented in Coq, and the development is available
@@ -655,7 +655,7 @@ formal discrepancy.
 \subsection{From Relations to Bits}
 \label{sec:discrete-model}
 
-Our description of the autpilot architecture in
+Our description of the autopilot architecture in
 Section~\ref{sec:memo-overview} describes the verified controller as the
 last piece of code that runs before signals are sent to the motors.  This
 is not strictly necessary.  There are advantages and disadvantages to
@@ -837,7 +837,7 @@ appropriate value for $\Delta$, the maximum time between discrete
 transitions.  However, any upper bound suffices since our proofs hold for
 all $\Delta$.  Finally, we ignore the formal gap between real arithmetic
 used in our models and floating-point arithmetic used in the running code.
-Future work can investigate closing this formal gap using Coq's libary for
+Future work can investigate closing this formal gap using Coq's library for
 reasoning about floating point computation~\cite{flocq11}.
 
 \subsection{Empirical Results}
@@ -850,7 +850,7 @@ learned that this was not the case.
 
 Experimentally, both the velocity and the height controller enforce their
 respective safety properties.  The height and velocity controllers allowed
-the quadcoptor to go right up to the provided height or velocity bounds.
+the quadcopter to go right up to the provided height or velocity bounds.
 In some rare cases, the quadcopter went above the bounds, by a small
 amount, for example about ten centimeters for a height bound of 30 meters.
 We attribute these small violations to un-modeled forces such as wind,
@@ -879,7 +879,7 @@ actions. We investigate this further in Chapter~\ref{chap:emsoft16}.
 Also, recall that our height controller is conservative in the way that it
 estimates upward thrust: it assumes that the thrust requested by the
 higher-level controller would be applied directly in the upward direction,
-even if the attitude of the quadcoptor is not upward.  As a result, if the
+even if the attitude of the quadcopter is not upward.  As a result, if the
 attitude is not level, our height controller assumes that there is a larger
 upward thrust than really occurs, and so it will engage earlier than it
 needs to.  We noticed this effect experimentally: when approaching the
@@ -983,7 +983,7 @@ factoring the problem into more manageable pieces.  We believe that even
 more abstraction is possible by codifying the ``tricks of the trade'' as
 formal, general-purpose proof rules.
 
-\paragraph*{Global state and unconstrainted transitions}
+\paragraph*{Global state and unconstrained transitions}
 Unlike in a programming language where \texttt{x = y + 1} means that
 \texttt{x} changes and the rest of the variables stays the same, in our
 logic (like in TLA), $\tlanextvar{x} = \tlavar{y} + 1$ says nothing about
@@ -1003,11 +1003,11 @@ renaming variables in LTL formulas. When one composes several components,
 variable renaming must occur at the global level to avoid unintentional
 conflicts. While this can be very tedious for programming languages, we
 feel that for specifications like the ones in this dissertation, the
-benefits outweight the drawbacks. However, more significantly,
+benefits outweigh the drawbacks. However, more significantly,
 Chapter~\ref{chap:emsoft16} will describe a specific pitfall that occurs
 when composing components that \emph{intentionally} write to the same set
 of variables.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 This chapter, \memoack{}
 

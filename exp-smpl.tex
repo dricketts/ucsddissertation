@@ -6,7 +6,7 @@ of Chapter~\ref{chap:emsoft16}, vehicles running those controllers exhibit
 significant oscillation near the boundary due to a discontinuity in the
 value output by the controllers. This oscillation, known as chattering in
 control theory~\cite{utkin06chatter}, occurs in practice in the presence of
-discontinuous control because of a combination of unmodeled dynamics and
+discontinuous control because of a combination of un-modeled dynamics and
 sampled-data implementation. The oscillation is undesirable from the
 perspective of the pilot. More significantly, it results in a discrepancy
 at the boundary between the position dynamics in the model and the position
@@ -114,7 +114,7 @@ enforce a linear relationship. Such a linear relationship removes the
 control discontinuity at the boundary. Section~\ref{sec:proof-geofence}
 provides the formal details of the velocity restriction.
 
-The actual system passes the resicted velocity to an underlying velocity
+The actual system passes the restricted velocity to an underlying velocity
 controller. In this chapter, we ignore the dynamics of the inner loop
 velocity controller controller and as in the rest of this dissertation,
 treat the system as a double integrator, in which the control law outputs
@@ -665,7 +665,7 @@ that for all $x,v \in \R$,
 \nabla \Bx \dotprod [v,\ignorearg] + \frac{\Bx (x,v)}{\p} &\leq \Bpw (x,v) - (\violation)\cdot \Delta \\
 &\leq 0
 \end{align}
-which satifies the premise of Theorem~\ref{thm:barrier-smpl-weak}.
+which satisfies the premise of Theorem~\ref{thm:barrier-smpl-weak}.
 \end{proof}
 
 Theorem~\ref{thm:x-bound-dbl-int} verifies the design procedure followed by
@@ -794,7 +794,7 @@ logic in Coq and re-phrase this condition in terms of \dL{}.
 % Should we compare to development effort for 1D pos from emsoft paper?
 % It took just a few days to verify.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 A special thanks to the Ardupilot developers, particularly Leonard Hall,
 who designed the piecewise velocity restriction that we modeled in this
 chapter.

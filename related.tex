@@ -106,7 +106,7 @@ in \dL{} on composition~\cite{Muller16comp,Muller17comp} of hybrid
 systems. The authors provide a form of parallel composition of components,
 allowing components to interact via ports satisfying input and output
 contracts. Unlike the work in Chapter~\ref{chap:emsoft16}, their framework
-explicitly disallows components from outputing to the same variables. This
+explicitly disallows components from outputting to the same variables. This
 makes the paper most comparable to the composition rule
 (Theorem~\ref{thm:sys-compose}) from Chapter~\ref{chap:memo15}. The
 framework from~\cite{Muller16comp,Muller17comp} does remove the restriction
@@ -114,7 +114,7 @@ to acyclic composition from Theorem~\ref{thm:sys-compose}. However,
 parallel composition in that framework is not an associative operation,
 while it is in Chapter~\ref{chap:memo15}. This restricts the flexibility of
 a user in building and composing more than two modules, as we did in
-Section~\ref{sec:delay-comp}. Morever, the work
+Section~\ref{sec:delay-comp}. Moreover, the work
 from~\cite{Muller16comp,Muller17comp} was not done in a higher-order proof
 assistant. Thus, the theorem is applied in KeYmaera X using an untrusted
 proof tactic. While this does not compromise soundness, it results in
@@ -140,11 +140,11 @@ The HHL prover~\cite{LiuHHL10,WangHHL2015} is an Isabelle/HOL embedding of
 Hybrid Hoare logic. Like KeYmaera X, the HHL prover provides a general
 proof calculus for hybrid systems but does not contain domain-specific
 proof rules like the ones in this dissertation for sampled-data
-systems. Morevoer, the embedding does not contain any rules for verifying
+systems. Moreover, the embedding does not contain any rules for verifying
 invariants of continuous flows. Instead, the prover relies on external
 decision procedures that automatically search for invariants. The prover
 assumes that invariants returned by these decision procedures are
-valid. Thus, formalzing theorems for checking invariants of continuous
+valid. Thus, formalizing theorems for checking invariants of continuous
 flows, as we have done throughout this dissertation, complements the
 decision procedures by preventing a bug in the decision procedures from
 compromising soundness. Instead, theorems like
@@ -447,14 +447,14 @@ about sampled-data systems.  Much of this work,
 including~\cite{chen1991input,seuret13sampled}, focuses on stability of
 sampled-data systems using Lyapunov or Lyapunov-like functions, which is an
 important but orthogonal concern. The most relevant to this dissertation is
-the work by Laila, Nešić, and Teel~\cite{laila02sampled} on a general
-framework for analyzing the behavior of dissipation inequalities for
-sampled-data systems. The exponential condition-based barrier functions
+the work by Laila, Ne\v si\'c, and Teel~\cite{laila02sampled} on a
+general framework for analyzing the behavior of dissipation inequalities
+for sampled-data systems. The exponential condition-based barrier functions
 from~\cite{kong2013barrier}, which we adapt in Chapter~\ref{chap:exp-smpl},
 are a particular type of dissipation inequality. The framework
 in~\cite{laila02sampled} applies to controllers that are designed using
 emulation: the controller is designed with respect to a continuous time
-appoximation of the system and the implemented digitally in a sampled-data
+approximation of the system and the implemented digitally in a sampled-data
 system. The authors then provide a series of theorems that quantify the
 effect of emulation on dissipation inequalities. This is essentially the
 same approach as Theorem~\ref{thm:barrier-smpl} in
@@ -524,7 +524,7 @@ fixed rather than bounded and more importantly, only verifies properties of
 states exactly at the sample times. An additional mechanism would be needed
 to verify properties of states between samples.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 Thanks to Andr\'e Platzer, Nathan Fulton, and Andrew Sogokon for answering
 numerous questions to help put this work in context.
 

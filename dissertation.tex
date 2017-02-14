@@ -107,14 +107,14 @@ To my wife
 % use. See the examples here. In addition, each chapter ack needs to
 % be repeated at the end of the relevant chapter.
 \begin{acknowledgements}
-I owe a tremendous debt to my advisor Sorin Lerner for supporting me both
+I owe a tremendous debt to my adviser Sorin Lerner for supporting me both
 technically and otherwise throughout a long PhD. From taking me on as an
 untested student switching research areas to letting me spend half of grad
 school in Germany with my wife, he has always put my interests first.
 
-A special thanks also goes to my original advisor Mohan Paturi, who always
+A special thanks also goes to my original adviser Mohan Paturi, who always
 gave me the freedom to pursue what I enjoyed and supported me when
-switching to a new research area and advisor.
+switching to a new research area and adviser.
 
 It was a great experience working with Gregory Malecha, who showed me the
 importance of technical simplicity and abstraction and who convinced me
@@ -260,7 +260,7 @@ automatically handling the fact that the time between executions of the
 controller is bounded. This tailored decomposition eliminates some of the
 basic tedious manipulation common to every sampled-data system, allowing
 one to focus on the application specific aspects of verification. The
-second proof rule allows for component composition with non-cylical
+second proof rule allows for component composition with non-cyclical
 assumptions -- that is, a component $C1$ can guarantee an invariant $Q$
 while assuming and invariant $P$ guaranteed by $C2$. However, $C2$ cannot
 rely on the invariance of $P$ when guaranteeing $Q$. In spite of this
@@ -305,13 +305,13 @@ community~\cite{kong2013barrier,xu15barrier,nguyen16barrier} has produced a
 new version of barrier certificates that are less conservative for closed
 properties. We provide the first implementation of this approach in a
 formal verification context, and demonstrate its ease of use on a component
-of the ardupilot geofencing module.
+of the Ardupilot geofencing module.
 
 Second, control systems are often designed under the assumption that
 controllers run continuously, while the actual implementation is typically
 a sampled-data system. System designers can compensate for this (and other)
 approximations by adding a safety ``buffer'' to the system. For example,
-the ardupilot geofence module stops the vehicle 1 meter prior to the actual
+the Ardupilot geofence module stops the vehicle 1 meter prior to the actual
 safety boundary. We developed a proof rule that formalizes this design
 approach by decomposing verification into a condition on the continuous
 time approximation and another on the approximation error.  This rule

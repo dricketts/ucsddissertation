@@ -3,7 +3,7 @@ desired safety properties when run separately. That chapter also described
 how to compose components, but informally followed the convention that
 components being composed do not constrain overlapping sets of
 variables. However, such a restriction is natural in sampled-data systems,
-for example when composing two controllers outputing to the same sets of
+for example when composing two controllers outputting to the same sets of
 actuators. This raises the question: when can two such controllers be run
 in parallel in order to enforce the conjunction of their respective safety
 properties? More generally, when can a sampled-data system be built up
@@ -54,15 +54,15 @@ In summary, the contributions of this chapter are:
 \item We implement in the Coq proof assistant a general approach for modular verification of sampled-data systems by separately exposing proofs of preservation and \progress{}. The development is available from: \url{https://github.com/ucsd-pl/veridrone/tree/EMSOFT-16}.
 \item We apply this approach to build and verify arbitrary 3D geofences for a quadcopter, including walls, boxes, and rectangular donuts, starting with two simple verified 1D controllers.
 We show that our modular verification techniques keep the proof burden manageable.
-\item We evaluate our geo-fences by running them on an actual quadcopter, and show that they work in practice.
-\item We discuss the capabilities of three state-of-the-art fully-automated tools (SpaceEx, Flow*, and dReach) in verifying our geo-fence controllers.
+\item We evaluate our geofences by running them on an actual quadcopter, and show that they work in practice.
+\item We discuss the capabilities of three state-of-the-art fully-automated tools (SpaceEx, Flow*, and dReach) in verifying our geofence controllers.
 \end{itemize}
 
 \section{Overview}
 We start with an informal description of the operators that our theory
 covers: substitution, conjunction, and disjunction.  We then give an
 overview of verifying controllers using these operators.  Finally, we
-describe how we applied this to build a verified family of geo-fences for a
+describe how we applied this to build a verified family of geofences for a
 quadcopter.
 
 \paragraph*{Operators}
@@ -667,9 +667,9 @@ We instantiate $Q$ with $\smallangle$ and $R$ with $\Ca$ to guarantee
 
 Finally, as noted above, we need to prove that
 $\W_{QC} \rightarrow \Rename{\sigma_{\partial^2\rightarrow{}QC}}{\W_{1D}}$,
-i.e. the continuous dynamics produced by the substition is an abstraction
+i.e. the continuous dynamics produced by the substitution is an abstraction
 of the full quadcopter dynamics.  This reasoning involves standard
-substition within differential equations, which we have formalized and
+substation within differential equations, which we have formalized and
 proved sound in Coq, and mechanical arithmetic reasoning.
 
 \paragraph*{Enforcing Planar Boundaries}
@@ -1089,7 +1089,7 @@ expressiveness, (3) flight behavior, and (4) comparison to fully automated
 tools.
 
 \subsection{Proof Effort}
-Table~\ref{fig:monitors} lists all of the geo-fencing controllers that we
+Table~\ref{fig:monitors} lists all of the geofencing controllers that we
 verified and flew, along with the composition mechanism, proof size, and
 number of symbols in the discrete transition for each one.  The first 2
 rows list controllers that we ported from prior work; these are our atomic
@@ -1154,7 +1154,7 @@ compose \emph{any} controller with any other controller, not just a cube.
 For example, if we were able to verify a controller enforcing a triangular
 prism or a sphere, we could compose instantiations of these controllers
 with our existing cube, with each other, or with any other controller.
-Again, all of this requires negligable additional proof burden.
+Again, all of this requires negligible additional proof burden.
 
 Conjunctive composition is similarly expressive -- the box and the cube
 both make heavy use of conjunctive composition.  The proof burden when
@@ -1162,7 +1162,7 @@ using conjunction comes from justifying \progress{} (progress) of the
 resulting systems, which is not as compositional, especially in highly
 coupled domains.  Nevertheless, Our separation of \progress{} (progress)
 and preservation makes it possible to build compositional proofs of
-presevation even in highly coupled domains such as the box and cube.
+preservation even in highly coupled domains such as the box and cube.
 Finally, substitution allows us to reuse all controllers by translating and
 rotating them, and by transforming them into controllers for different
 physical dynamics.
@@ -1319,5 +1319,5 @@ verifying safety of systems with symbolic parameters, such as $\amin$ --
 they require concrete numerical bounds on these parameters, which weakens
 the safety theorem.
 
-\section{Acknowledgements}
+\section{Acknowledgments}
 This chapter, \emsoftack{}
