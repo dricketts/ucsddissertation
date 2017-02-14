@@ -447,9 +447,9 @@ about sampled-data systems.  Much of this work,
 including~\cite{chen1991input,seuret13sampled}, focuses on stability of
 sampled-data systems using Lyapunov or Lyapunov-like functions, which is an
 important but orthogonal concern. The most relevant to this dissertation is
-the work by Laila, Ne\v si\'c, and Teel~\cite{laila02sampled} on a
-general framework for analyzing the behavior of dissipation inequalities
-for sampled-data systems. The exponential condition-based barrier functions
+the work by Laila, Ne\v si\'c, and Teel~\cite{laila02sampled} on a general
+framework for analyzing the behavior of dissipation inequalities for
+sampled-data systems. The exponential condition-based barrier functions
 from~\cite{kong2013barrier}, which we adapt in Chapter~\ref{chap:exp-smpl},
 are a particular type of dissipation inequality. The framework
 in~\cite{laila02sampled} applies to controllers that are designed using
@@ -466,13 +466,12 @@ barrier certificates and our less general model of sampled-data systems,
 apply only to states bounded by some constant magnitude. This restriction
 is not required by Theorem~\ref{thm:barrier-smpl}. Moreover, none of the
 work in~\cite{laila02sampled} has been formalized in a proof assistant like
-Coq. Finally, the theorems in~\cite{laila02sampled} only give deviation
-bounds of dissipation inequalities over a single sampling period, while
-Theorem~\ref{thm:barrier-smpl} quantifies how much the deviation over a
-single sampling period affects the invariant violation over an infinite
-time horizon. Nevertheless, real systems often permit conservative constant
-bounds on the magnitude of the state, and it would be interesting to
-formalize the framework of~\cite{laila02sampled} in Coq and extend it to
+Coq. Finally, the theorems in~\cite{laila02sampled} only characterize
+dissipation inequalities over a single sampling period, while
+Theorem~\ref{thm:barrier-smpl} bounds the invariant violation over an
+infinite time horizon. Nevertheless, real systems often permit conservative
+constant bounds on the magnitude of the state, and it would be interesting
+to formalize the framework of~\cite{laila02sampled} in Coq and extend it to
 infinite time horizons to determine how the violation bounds compare to
 those of Theorem~\ref{thm:barrier-smpl}.
 

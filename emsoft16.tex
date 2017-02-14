@@ -1099,6 +1099,8 @@ remaining rows list controllers that we built using disjunction and
 substitution.
 
 \begin{table}
+\caption{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
+\label{fig:monitors}
 \begin{tabular}{l|l|r|r}
 id: Name & Built How? & \# of Symbols & Lines of Proof \\
 \hline 
@@ -1111,8 +1113,6 @@ f: 3D square donut & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\d
 g: 3D +, T, $\bot$ & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}$ & 5412 & 23 \\
 h: 3D pilot box & $\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}\disjoinop\Rename{}{e}$ & 5412 & 23 \\
 \end{tabular}
-\caption{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
-\label{fig:monitors}
 \end{table}
 
 Note that our 1D position controller ($b$ in Table~\ref{fig:monitors})
