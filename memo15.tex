@@ -257,10 +257,10 @@ and evolution predicate $\W$, if the following conditions hold:
 $Q~\entails 0 \leq \Time \leq \Delta~\wedge~I \rightarrow P$
 \item
 \label{thm:sys-ind-discr}
-$Q~\entails 0 \leq \Time{} \leq \Delta~\wedge~P~\wedge~D~\wedge~\tlanextvar{\Time{}} = \Time{} \rightarrow \Next{P}$
+$Q~\entails \Time{} = 0~\wedge~P~\wedge~D~\wedge~0 \leq \tlanextvar{\Time{}} \leq \Delta\rightarrow \Next{P}$
 \item
 \label{thm:sys-ind-cont}
-$Q~\entails \Time \leq \Delta~\wedge~0 \leq \tlanextvar{\Time}~\wedge~P~\wedge~\Continuous{(\W)} \rightarrow \Next{P}$
+$Q~\entails \Time \leq \Delta~\wedge~0 \leq \tlanextvar{\Time} \leq \Time~\wedge~P~\wedge~\Continuous{(\W)} \rightarrow \Next{P}$
 \end{enumerate}
 then
 \[
