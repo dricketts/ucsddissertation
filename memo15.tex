@@ -307,12 +307,12 @@ following proof obligation (the reasoning in the second case is simpler):
 \begin{array}{lc}
 \V \leq \Vmax & \vdash \left[
 \begin{array}{ll}
-& 0 \leq \Time \leq \Delta \\
+& \Time{} = 0 \\
 \wedge & \max(0,\T - g)*\Time + \V \leq \ub \\
 \wedge & (\Tproposed-g)*\Delta + \Vmax \leq \ub \\
 \wedge & \T\tlaprime = \Tproposed  \\
 \wedge & \V\tlaprime = \V \\
-\wedge & \Time\tlaprime = \Time \\
+\wedge & 0 \leq \tlanextvar{\Time{}} \leq \Delta \\
 \rightarrow & \max(0,\T\tlaprime - g)*\Time\tlaprime + \V\tlaprime \leq \ub
 \end{array}
 \right]
@@ -327,7 +327,7 @@ transitions.  This proof obligation is slightly more difficult:
 \begin{array}{lc}
 \V \leq \Vmax & \vdash \left[
 \begin{array}{ll}
-& \Time \leq \Delta \wedge 0 \leq \Time\tlaprime \\
+& \Time \leq \Delta \wedge 0 \leq \Time\tlaprime \leq \Time \\
 \wedge & \max(0,\T - g)\cdot\Time + \V \leq \ub \\
 \wedge & \Continuous{(\W)} \\
 \rightarrow & \max(0,\T\tlaprime - g)\cdot\Time\tlaprime + \V\tlaprime \leq \ub
