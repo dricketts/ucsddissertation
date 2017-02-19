@@ -1099,7 +1099,7 @@ remaining rows list controllers that we built using disjunction and
 substitution.
 
 \begin{table}
-\caption{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
+\caption[Systems implemented and proved correct.]{Systems implemented and proved correct. The first column is the name of the system. The second column shows how each system was built and proved correct from smaller components. $\Rename{}{i}$ indicates a substitution applied to system $i$ (we have omitted the specific substitution); $\SysConjoin$ represents conjunction composition; and $\disjoinop$ represents disjunction composition. The third and fourth columns show the number of symbols in the discrete controller and the number of lines of proofs, respectively.}
 \label{fig:monitors}
 \begin{tabular}{l|l|r|r}
 id: Name & Built How? & \# of Symbols & Lines of Proof \\
@@ -1296,7 +1296,7 @@ due to the complexity of the domain, they are limited to certain classes of
 systems and properties.
 
 PHAVer~\cite{PHAVerSTTT08}, which we ran through the SpaceEx tool
-platform~\cite{frehse2011spaceex-small}, is able to verify only one of our
+platform~\cite{frehse2011spaceex}, is able to verify only one of our
 systems, namely the combined upper and lower bound on velocity.  However,
 PHAVer is not able to verify the upper bound on velocity in isolation,
 probably because there are fewer constraints on acceleration to limit the
